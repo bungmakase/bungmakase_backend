@@ -1,33 +1,38 @@
 # workflow의 이름
 name: CI
 
-# 해당 workflow가 언제 실행될 것인지에 대한 트리거를 지정
+# 실행 트리거 (Push, PR, 수동 실행 지원)
 on:
   push:
-    branches: [ main ] # master branch로 push 될 때 실행됩니다.
+    branches: [ main ] 
   pull_request:
-    branches: [ main ]  # master branch로 pull request될 때 실행됩니다.
+    branches: [ main ]
+  workflow_dispatch:  # 👈 이 부분을 추가하면 GitHub Actions에서 직접 실행 가능
 
-# workflow는 한개 이상의 job을 가지며, 각 job은 여러 step에 따라 단계를 나눌 수 있습니다.
+# workflow는 하나 이상의 job을 포함하며, 각 job은 여러 step을 가짐
 jobs:
   build:
     name: CI
-    # 해당 jobs에서 아래의 steps들이 어떠한 환경에서 실행될 것인지를 지정합니다.
     runs-on: ubuntu-latest
 
     steps:
-     # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소를 체크아웃합니다.
+      # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소를 체크아웃
       - uses: actions/checkout@v2
-      - name: Set up JDK 21     #jdk 버전 확인
+
+      # JDK 21 (Zulu) 설정
+      - name: Set up JDK 21     
         uses: actions/setup-java@v2
         with:
           java-version: '21'
           distribution: 'zulu'
 
+      # Gradle 실행 권한 부여
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
         shell: bash
       
+      # Gradle 빌드 실행
       - name: Build with Gradle
         run: ./gradlew build
         shell: bash
+
