@@ -1,0 +1,66 @@
+# workflow의 이름
+name: CD
+
+# 실행 트리거 (Push, 수동 실행 가능)
+on:
+  push:
+    branches: [ main ] # main branch로 push 될 때 실행됩니다.
+  workflow_dispatch:  # 👈 수동 실행 트리거 추가
+
+# 해당 yml 내에서 사용할 key - value
+env:
+  NCP_BUCKET_NAME: bungmakase-bucket
+  PROJECT_NAME: bungmakase
+  NCP_REGION: kr-standard
+  NCP_ENDPOINT: https://kr.object.ncloudstorage.com  # NCP Object Storage 엔드포인트
+
+jobs:
+  build:
+    name: CD
+    runs-on: ubuntu-latest
+
+    steps:
+      # 작업에서 액세스할 수 있도록 $GITHUB_WORKSPACE에서 저장소를 체크아웃합니다.
+      - uses: actions/checkout@v2
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v2
+        with:
+          java-version: '21'
+          distribution: 'zulu'
+
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+        shell: bash
+
+      - name: Build with Gradle
+        run: ./gradlew build
+        shell: bash
+
+      - name: Make zip file
+        run: zip -r ./$GITHUB_SHA.zip .
+        shell: bash
+
+      # ✅ NCP Object Storage 설정
+      - name: Install s3cmd
+        run: sudo apt-get install -y s3cmd
+        shell: bash
+
+      - name: Configure NCP credentials
+        run: |
+          echo "[default]" > ~/.s3cfg
+          echo "access_key = ${{ secrets.NCP_ACCESS_KEY_ID }}" >> ~/.s3cfg
+          echo "secret_key = ${{ secrets.NCP_SECRET_ACCESS_KEY }}" >> ~/.s3cfg
+          echo "host_base = $NCP_ENDPOINT" >> ~/.s3cfg
+          echo "host_bucket = $NCP_ENDPOINT" >> ~/.s3cfg
+        shell: bash
+
+      # ✅ script files 복사
+      - name: Copy script
+        run: cp ./scripts/*.sh ./deploy
+        shell: bash
+
+      # ✅ NCP Object Storage(S3) 업로드
+      - name: Upload to NCP S3
+        run: s3cmd put ./$GITHUB_SHA.zip s3://$NCP_BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip --host=$NCP_ENDPOINT
+        shell: bash
