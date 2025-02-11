@@ -55,11 +55,6 @@ jobs:
           echo "host_bucket = $NCP_ENDPOINT" >> ~/.s3cfg
         shell: bash
 
-      # ✅ script files 복사
-      - name: Copy script
-        run: cp ./scripts/*.sh ./deploy
-        shell: bash
-
       - name: Rename ZIP file
         run: mv ./$GITHUB_SHA.zip ./latest.zip
         shell: bash
