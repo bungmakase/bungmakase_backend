@@ -60,29 +60,10 @@ jobs:
         run: cp ./scripts/*.sh ./deploy
         shell: bash
 
-      # ✅ NCP Object Storage(S3) 업로드
-      - name: Upload to NCP S3
-        run: s3cmd put ./$GITHUB_SHA.zip s3://$NCP_BUCKET_NAME/$PROJECT_NAME/$GITHUB_SHA.zip --host=$NCP_ENDPOINT
+      - name: Rename ZIP file
+        run: mv ./$GITHUB_SHA.zip ./latest.zip
         shell: bash
 
-      - name: Deploy to NCP SourceDeploy (Rolling)
-        run: |
-          curl -X POST "https://deploy.apigw.ntruss.com/api/v1/projects/{PROJECT_ID}/deployments" \
-            -H "Content-Type: application/json" \
-            -H "x-ncp-iam-access-key: ${{ secrets.NCP_ACCESS_KEY_ID }}" \
-            -H "x-ncp-iam-signature-v2: $(echo -n $(date +%s000) | openssl dgst -sha256 -hmac ${{ secrets.NCP_SECRET_ACCESS_KEY }} -binary | base64)" \
-            -d '{
-              "deploymentGroupName": "bungmakase",
-              "source": {
-                "type": "OBJECT_STORAGE",
-                "bucketName": "bungmakase-bucket",
-                "objectPath": "cicdtest/${{ github.sha }}.zip"
-              },
-              "deploymentConfigName": "NCPDefault.Rolling",
-              "rollingConfig": {
-                "batchSize": 1,
-                "batchPercentage": 25
-              },
-              "fileExistsBehavior": "OVERWRITE"
-            }'
-
+      - name: Upload to NCP S3 (Always latest.zip)
+        run: s3cmd put ./latest.zip s3://$NCP_BUCKET_NAME/$PROJECT_NAME/latest.zip --host=$NCP_ENDPOINT
+        shell: bash
