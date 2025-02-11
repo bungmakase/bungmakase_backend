@@ -1,0 +1,22 @@
+version: 0.0
+os: linux
+
+# Object Storage에서 다운로드한 파일의 배포 경로
+files:
+  - source: /
+    destination: /root/
+    overwrite: yes
+
+# 배포된 파일의 권한 설정
+permissions:
+  - object: /
+    pattern: "**"
+    owner: ubuntu
+    group: ubuntu
+
+# 배포 완료 후 실행할 스크립트 지정 (deploy.sh 실행)
+hooks:
+  ApplicationStart:
+    - location: scripts/deploy.sh
+      timeout: 60
+      runas: ubuntu
