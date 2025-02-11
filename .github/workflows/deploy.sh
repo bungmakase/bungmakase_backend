@@ -1,10 +1,10 @@
 #!/bin/bash
-BUILD_JAR=$(ls /root/build/libs/*.jar)
+BUILD_JAR=$(ls /root/*.jar)
 JAR_NAME=$(basename $BUILD_JAR)
 echo "> build 파일명: $JAR_NAME" >> /root/deploy.log
 
 echo "> build 파일 복사" >> /root/deploy.log
-DEPLOY_PATH=/home/[본인경로]/
+DEPLOY_PATH=/root/
 cp $BUILD_JAR $DEPLOY_PATH
 
 echo "> 현재 실행중인 애플리케이션 pid 확인" >> /root/deploy.log
