@@ -62,3 +62,18 @@ jobs:
       - name: Upload to NCP S3 (Always latest.zip)
         run: s3cmd put ./latest.zip s3://$NCP_BUCKET_NAME/$PROJECT_NAME/latest.zip --host=$NCP_ENDPOINT
         shell: bash
+
+      # 소스커밋에 푸시
+      - name: Configure Git
+        run: |
+          git config --global user.name "jdoeun"
+          git config --global user.email "jde429@khu.ac.kr"
+
+      - name: Add SourceCommit remote
+        run: |
+          git remote add sourcecommit https://devtools.ncloud.com/3464490/bungmakase.git
+          git fetch sourcecommit
+
+      - name: Push changes to SourceCommit
+        run: |
+          git push --force sourcecommit main
