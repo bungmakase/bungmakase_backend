@@ -64,11 +64,6 @@ jobs:
         shell: bash
 
       # 소스커밋 푸시
-      - name: Debug Secrets (확인용)
-        run: |
-          echo "Repo URL: ${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}"
-          echo "Username: ${{ secrets.NCP_SOURCECOMMIT_USERNAME }}"
-          echo "Password Length: ${#secrets.NCP_SOURCECOMMIT_PASSWORD}"
 
       - name: Configure Git
         run: |
