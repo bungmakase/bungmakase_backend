@@ -36,17 +36,4 @@ jobs:
         run: ./gradlew build
         shell: bash
 
-      # 소스커밋에 푸시
-      - name: Configure Git
-        run: |
-          git config --global user.name "jdoeun"
-          git config --global user.email "jde429@khu.ac.kr"
-
-      - name: Add SourceCommit remote
-        run: |
-          git remote add sourcecommit https://${{ secrets.NCP_SOURCECOMMIT_USERNAME }}:${{ secrets.NCP_SOURCECOMMIT_PASSWORD }}@${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}
-          git fetch sourcecommit
-
-      - name: Push changes to SourceCommit
-        run: |
-          git push --force sourcecommit main
+      
