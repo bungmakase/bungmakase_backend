@@ -64,6 +64,12 @@ jobs:
         shell: bash
 
       # 소스커밋 푸시
+      - name: Debug Secrets (확인용)
+        run: |
+          echo "Repo URL: ${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}"
+          echo "Username: ${{ secrets.NCP_SOURCECOMMIT_USERNAME }}"
+          echo "Password Length: ${#secrets.NCP_SOURCECOMMIT_PASSWORD}"
+
       - name: Configure Git
         run: |
           git config --global user.name "jdoeun"
@@ -71,7 +77,7 @@ jobs:
 
       - name: Add SourceCommit remote
         run: |
-          git remote remove sourcecommit || true  # 기존 remote 삭제 후 재등록
+          git remote remove sourcecommit || true  # 기존 remote 삭제 (없어도 오류 무시)
           git remote add sourcecommit https://${{ secrets.NCP_SOURCECOMMIT_USERNAME }}:${{ secrets.NCP_SOURCECOMMIT_PASSWORD }}@${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}
           git fetch sourcecommit || echo "⚠ SourceCommit fetch skipped"
 
