@@ -78,8 +78,7 @@ jobs:
       - name: Add SourceCommit remote
         run: |
           git remote remove sourcecommit || true  # 기존 remote 삭제 (없어도 오류 무시)
-          git remote add sourcecommit https://${{ secrets.NCP_SOURCECOMMIT_USERNAME }}:${{ secrets.NCP_SOURCECOMMIT_PASSWORD }}@${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}
-          git fetch sourcecommit || echo "⚠ SourceCommit fetch skipped"
+          git remote add sourcecommit https://${{ secrets.NCP_SOURCECOMMIT_USERNAME }}:${{ secrets.NCP_SOURCECOMMIT_PASSWORD }}@devtools.ncloud.com/3464490/bungmakase.git
 
       - name: Ensure branch exists on SourceCommit
         run: |
