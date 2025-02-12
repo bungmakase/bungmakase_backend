@@ -63,7 +63,7 @@ jobs:
         run: s3cmd put ./latest.zip s3://$NCP_BUCKET_NAME/$PROJECT_NAME/latest.zip --host=$NCP_ENDPOINT
         shell: bash
 
-      # 소스커밋에 푸시
+      # 소스커밋 푸시
       - name: Configure Git
         run: |
           git config --global user.name "jdoeun"
@@ -71,8 +71,15 @@ jobs:
 
       - name: Add SourceCommit remote
         run: |
-          git remote add sourcecommit https://devtools.ncloud.com/3464490/bungmakase.git
-          git fetch sourcecommit
+          git remote remove sourcecommit || true  # 기존 remote 삭제 후 재등록
+          git remote add sourcecommit https://${{ secrets.NCP_SOURCECOMMIT_USERNAME }}:${{ secrets.NCP_SOURCECOMMIT_PASSWORD }}@${{ secrets.NCP_SOURCECOMMIT_REPO_URL }}
+          git fetch sourcecommit || echo "⚠ SourceCommit fetch skipped"
+
+      - name: Ensure branch exists on SourceCommit
+        run: |
+          if ! git ls-remote --exit-code sourcecommit main; then
+            git push sourcecommit main
+          fi
 
       - name: Push changes to SourceCommit
         run: |
