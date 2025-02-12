@@ -28,6 +28,7 @@ jobs:
         with:
           java-version: '21'
           distribution: 'zulu'
+          fetch-depth: 0  # 전체 Git 히스토리를 가져오기 위해 설정
 
       - name: Grant execute permission for gradlew
         run: chmod +x ./gradlew
