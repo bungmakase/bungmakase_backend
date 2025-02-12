@@ -65,7 +65,10 @@ jobs:
         shell: bash
 
       # 소스커밋 푸시
-
+      - name: Unshallow the repository
+        run: |
+          git fetch --unshallow || echo "⚠ Already unshallow"
+          
       - name: Configure Git
         run: |
           git config --global user.name "jdoeun"
