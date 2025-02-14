@@ -46,7 +46,7 @@ server:
 
 kakao:
   client-id: "0ed5f2288c7f985d06f7ca5610740c23"
-  redirect-uri: "http://localhost:8080/api/auth/kakao/callback"
+  redirect-uri: "http://211.188.61.117:8080//api/auth/kakao/callback"
 
 
 
