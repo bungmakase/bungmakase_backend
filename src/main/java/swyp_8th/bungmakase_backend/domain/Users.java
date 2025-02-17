@@ -19,6 +19,8 @@ public class Users {
     @Column(unique = true)
     private String nickname;
 
+    private String image_url;
+
     private String email; // 이메일 로그인 시 필요
 
     @Enumerated(EnumType.STRING)
