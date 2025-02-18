@@ -27,7 +27,7 @@ public class Users {
     private UserAuthTypeEnum authType;
 
     @Column(unique = true)
-    private String oauthId; // 카카오 로그인 시 필요
+    private Long oauthId; // 카카오 로그인 시 필요
 
     private String password; // 이메일 로그인 시 필요
 
