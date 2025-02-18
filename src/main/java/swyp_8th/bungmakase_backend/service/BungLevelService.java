@@ -8,7 +8,7 @@ import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
 public class BungLevelService {
 
     public UserLevelResponseDto getUserLevel(String token) throws Exception {
-
+        return null;
     }
 
 }

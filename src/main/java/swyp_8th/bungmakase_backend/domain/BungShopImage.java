@@ -21,6 +21,10 @@ public class BungShopImage {
     @JoinColumn(name = "bung_shop_id")
     private BungShop bungShop;
 
+    @ManyToOne
+    @JoinColumn(name = "bung_shop_review_id")
+    private BungShopReview bungShopReview;
+
     private String imageUrl;
 
     private LocalDateTime uploadedAt = LocalDateTime.now();
