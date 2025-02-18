@@ -2,8 +2,12 @@ package swyp_8th.bungmakase_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
+import reactor.core.publisher.Mono;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.dto.KakaoUserInfoDto;
@@ -33,17 +37,20 @@ public class KakaoAuthService {
      */
     public String getAccessToken(String code) {
         return webClient.post()
-                .uri(uriBuilder -> uriBuilder.path(KAKAO_TOKEN_URL)
-                        .queryParam("grant_type", "authorization_code")
-                        .queryParam("client_id", CLIENT_ID)
-                        .queryParam("redirect_uri", REDIRECT_URI)
-                        .queryParam("code", code)
-                        .build())
+                .uri(KAKAO_TOKEN_URL)
+                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_FORM_URLENCODED_VALUE)
+                .header(HttpHeaders.ACCEPT, MediaType.APPLICATION_JSON_VALUE) // JSON 응답 수락
+                .body(BodyInserters.fromFormData("grant_type", "authorization_code")
+                        .with("client_id", CLIENT_ID)
+                        .with("redirect_uri", REDIRECT_URI)
+                        .with("code", code))
                 .retrieve()
                 .bodyToMono(TokenResponse.class)
-                .block() // 동기 방식으로 반환
-                .getAccessToken();
+                .map(TokenResponse::getAccessToken) // `access_token`만 추출
+                .block(); // 동기 방식 처리
     }
+
+
 
     /**
      * 카카오 토큰 응답 DTO
