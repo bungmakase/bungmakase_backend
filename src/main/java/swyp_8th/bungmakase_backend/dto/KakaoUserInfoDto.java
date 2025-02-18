@@ -1,38 +1,43 @@
 package swyp_8th.bungmakase_backend.dto;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+import lombok.Data;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-@Getter
-@Setter
-@NoArgsConstructor
-@JsonIgnoreProperties(ignoreUnknown = true) // 응답 JSON 중 필요 없는 데이터 무시
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+@Data
+@Getter @Setter
 public class KakaoUserInfoDto {
-    @JsonProperty("id")
-    private Long id; // 카카오 고유 ID
+    private String id;
+    private LocalDateTime connectedAt;
+    private String email;
+    private String nickname;
+    private String image_url;
 
-    @JsonProperty("kakao_account")
-    private KakaoAccount kakaoAccount; // 카카오 계정 정보
+    public KakaoUserInfoDto(String jsonResponseBody){
+        JsonParser parser = new JsonParser();
+        JsonElement element = parser.parse(jsonResponseBody);
 
-    @Getter
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class KakaoAccount {
-        @JsonProperty("profile")
-        private Profile profile; // 프로필 정보
+        this.id = element.getAsJsonObject().get("id").getAsString();
+
+        String connected_at = element.getAsJsonObject().get("connected_at").getAsString();
+        connected_at = connected_at.substring(0, connected_at.length() - 1);
+        LocalDateTime connectDateTime = LocalDateTime.parse(connected_at, DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"));
+        this.connectedAt = connectDateTime;
+
+        JsonObject properties = element.getAsJsonObject().get("properties").getAsJsonObject();
+        this.nickname = properties.has("nickname") ? properties.getAsJsonObject().get("nickname").getAsString() : null;
+        this.image_url = properties.has("profile_image_url") ? properties.getAsJsonObject().get("profile_image_url").getAsString() : null;
+
+        JsonObject kakaoAccount = element.getAsJsonObject().get("kakao_account").getAsJsonObject();
+        this.email = kakaoAccount.has("email") ? kakaoAccount.getAsJsonObject().get("email").getAsString() : null;
+
+
     }
 
-    @Getter
-    @NoArgsConstructor
-    @JsonIgnoreProperties(ignoreUnknown = true)
-    public static class Profile {
-        @JsonProperty("nickname")
-        private String nickname; // 닉네임
-
-        @JsonProperty("profile_image_url")
-        private String profileImageUrl; // 프로필 사진 URL
-    }
 }
