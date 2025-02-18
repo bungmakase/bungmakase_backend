@@ -75,11 +75,9 @@ public class KakaoAuthService {
      * 유저 정보 저장 및 JWT 발급
      */
     public String processUserLogin(KakaoUserInfoDto userInfo) {
-        // 카카오 ID를 String으로 변환
-        String oauthId = String.valueOf(userInfo.getId());
 
         // 기존 유저 조회
-        Optional<Users> existingUser = userRepository.findByKakaoId(userInfo.getId());
+        Optional<Users> existingUser = userRepository.findByOauthId(userInfo.getId());
         Users user;
 
         if (existingUser.isPresent()) {
@@ -90,7 +88,7 @@ public class KakaoAuthService {
         } else {
             // 신규 유저 생성
             user = new Users();
-            user.setOauthId(oauthId); // OAuth ID 설정
+            user.setOauthId(userInfo.getId()); // OAuth ID 설정
             user.setNickname(userInfo.getKakaoAccount().getProfile().getNickname());
             user.setImage_url(userInfo.getKakaoAccount().getProfile().getProfileImageUrl());
             userRepository.save(user); // DB 저장
