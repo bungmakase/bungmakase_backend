@@ -6,5 +6,5 @@ import swyp_8th.bungmakase_backend.domain.Users;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
-    Optional<Users> findByKakaoId(Long kakaoId);
+    Optional<Users> findByOauthId(Long oauthId);
 }
