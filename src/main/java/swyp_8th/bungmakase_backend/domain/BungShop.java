@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.math.BigDecimal;
+import java.time.LocalTime;
 import java.util.UUID;
 
 @Entity
@@ -25,5 +26,14 @@ public class BungShop {
     private BigDecimal latitude;
 
     private String phoneNumber;
-    private String openingHours;
+
+
+    @Column(name = "start_time")
+    private LocalTime startTime;
+
+    @Column(name = "end_time")
+    private LocalTime endTime;
+
+    @Column(name = "tastes", columnDefinition = "TEXT")
+    private String tastes; // JSON 또는 콤마 구분 문자열로 저장 가능
 }

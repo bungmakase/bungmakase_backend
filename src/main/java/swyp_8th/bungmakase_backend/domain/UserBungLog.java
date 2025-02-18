@@ -30,5 +30,6 @@ public class UserBungLog {
     @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 1")
     private Long count = 1L;
 
+    @Column(name = "tags", columnDefinition = "TEXT")
     private String tags;
 }
