@@ -27,6 +27,12 @@ public class AuthController {
         return ResponseEntity.status(response.getCode()).body(response);
     }
 
+    @GetMapping("/check-nickname")
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> checkNickname(@RequestParam String nickname) {;
+        ResponseTemplate response = authService.checkNicknameAvailability(nickname);
+        return ResponseEntity.status(response.getCode()).body(response);
+    }
+
     @PostMapping(value = "/signup/email", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<Map<String, String>>> signup(
             @RequestPart("userData") SignupRequestDto requestDto,

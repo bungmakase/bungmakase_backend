@@ -34,6 +34,17 @@ public class AuthService {
         return new ResponseTemplate(SuccessCode.SUCCESS_200, null);
     }
 
+    public ResponseTemplate checkNicknameAvailability(String nickname) {
+
+        if (userRepository.existsByNickname(nickname)) {
+            return new ResponseTemplate(FailureCode.USED_NICKNAME_409, null);
+        }
+
+        return new ResponseTemplate(SuccessCode.SUCCESS_200, null);
+    }
+
+
+
     @Transactional
     public String signup(SignupRequestDto requestDto, MultipartFile profileImage) {
 
