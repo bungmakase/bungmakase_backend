@@ -7,7 +7,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import swyp_8th.bungmakase_backend.dto.KakaoUserInfoDto;
+import swyp_8th.bungmakase_backend.dto.kakao_auth.KakaoUserInfoDto;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
@@ -58,8 +58,8 @@ public class KakaoAuthController {
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-        // 3. 붕 도감 페이지로 리다이렉트 (JWT 포함)
-        response.sendRedirect("/api/dogam/list");
+        // 3. 리다이렉트 (JWT 포함)
+        response.sendRedirect("/");
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken);
     }
 

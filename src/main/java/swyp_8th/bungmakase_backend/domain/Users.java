@@ -1,16 +1,20 @@
 package swyp_8th.bungmakase_backend.domain;
 
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 import swyp_8th.bungmakase_backend.domain.enums.UserAuthTypeEnum;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
 @Getter @Setter
 @Table(name = "users")
+@Builder
+@NoArgsConstructor(access = AccessLevel.PUBLIC)
+@AllArgsConstructor
 public class Users {
     @Id
     @GeneratedValue
@@ -31,19 +35,23 @@ public class Users {
 
     private String password; // 이메일 로그인 시 필요
 
-    private String guestId; // 게스트 로그인 시 필요
-
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 1")
+    @Column(columnDefinition = "BIGINT DEFAULT 1")
     private Long level = 1L;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long bungCount = 0L;
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    @Column(columnDefinition = "BIGINT DEFAULT 0")
     private Long recentCount = 0L;
 
-    @Column(nullable = false, updatable = false)
-    private LocalDateTime createdAt = LocalDateTime.now();
+    private LocalDateTime createdAt;
 
-    private LocalDateTime updatedAt = LocalDateTime.now();
+    @PrePersist
+    protected void onCreate() {
+        this.createdAt = LocalDateTime.now();
+    }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true) // ✅ 추가
+    private GuestSession guestSession;
+
 }
