@@ -7,6 +7,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.domain.Users;
+import swyp_8th.bungmakase_backend.dto.auth.EmailLoginRequestDto;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
@@ -25,15 +26,27 @@ public class AuthController {
     private final AuthService authService;
 
     @GetMapping("/check-email")
-    public ResponseEntity<ResponseTemplate<Map<String, String>>> checkEmail(@RequestParam String email) {;
-        ResponseTemplate response = authService.checkEmailAvailability(email);
-        return ResponseEntity.status(response.getCode()).body(response);
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> checkEmail(@RequestParam String email) {
+        ;
+        try {
+            ResponseTemplate response = authService.checkEmailAvailability(email);
+            return ResponseEntity.status(response.getCode()).body(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+
     }
 
     @GetMapping("/check-nickname")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> checkNickname(@RequestParam String nickname) {;
-        ResponseTemplate response = authService.checkNicknameAvailability(nickname);
-        return ResponseEntity.status(response.getCode()).body(response);
+        try{
+            ResponseTemplate response = authService.checkNicknameAvailability(nickname);
+            return ResponseEntity.status(response.getCode()).body(response);
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
     }
 
     @PostMapping(value = "/signup/email", consumes = {"multipart/form-data"})
@@ -41,11 +54,18 @@ public class AuthController {
             @RequestPart("userData") SignupRequestDto requestDto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
 
-        String jwt = authService.signup(requestDto, image);
+        try {
+            String jwt = authService.signup(requestDto, image);
 
-        return ResponseEntity.status(HttpStatus.CREATED)
-                .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
-                .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+
+
     }
 
     @PostMapping("/guest")
@@ -63,6 +83,31 @@ public class AuthController {
         }
     }
 
+    @PostMapping(value = "/login/email")
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> loginWithEmail(
+            @RequestBody EmailLoginRequestDto request) {
 
+        try {
+            String jwt = authService.loginWithEmail(request);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> logout(@RequestHeader("Authorization") String authorizationHeader){
+        try{
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
 
 }

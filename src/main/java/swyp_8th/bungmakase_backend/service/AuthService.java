@@ -11,6 +11,7 @@ import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.domain.GuestSession;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.domain.enums.UserAuthTypeEnum;
+import swyp_8th.bungmakase_backend.dto.auth.EmailLoginRequestDto;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
@@ -100,11 +101,23 @@ public class AuthService {
 
     }
 
-    // 매일 자정에 만료된 세션 삭제
+    // 매일 자정에 만료된 게스트 세션 삭제
     @Scheduled(cron = "0 0 0 * * ?")
     @Transactional
     public void deleteExpiredGuestSessions() {
         LocalDateTime now = LocalDateTime.now();
         guestSessionRepository.deleteExpiredSessions(now);
+    }
+
+    public String loginWithEmail(EmailLoginRequestDto request) {
+        Users user = userRepository.findByEmail(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("로그인 실패 - 등록되지 않은 이메일입니다."));
+
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new IllegalArgumentException("로그인 실패 - 비밀번호가 일치하지 않습니다.");
+        }
+
+        // JWT 토큰 생성
+        return jwtConfig.generateToken(user.getId());
     }
 }

@@ -21,7 +21,6 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     boolean existsByNickname(String nickname);
 
-    // 만료된 게스트 유저 삭제
-    void deleteUsersById(UUID id);
+
 
 }
