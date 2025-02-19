@@ -1,34 +1,23 @@
 package swyp_8th.bungmakase_backend.service;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import jakarta.validation.constraints.Email;
 import lombok.RequiredArgsConstructor;
-import org.apache.tomcat.util.json.JSONParser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.json.JsonParseException;
-import org.springframework.boot.json.JsonParser;
 import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.web.reactive.function.client.WebClient;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.domain.Users;
-import swyp_8th.bungmakase_backend.dto.KakaoUserInfoDto;
-import swyp_8th.bungmakase_backend.dto.OAuthToken;
+import swyp_8th.bungmakase_backend.domain.enums.UserAuthTypeEnum;
+import swyp_8th.bungmakase_backend.dto.kakao_auth.KakaoUserInfoDto;
+import swyp_8th.bungmakase_backend.dto.kakao_auth.OAuthToken;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -149,6 +138,8 @@ public class KakaoAuthService {
             user.setOauthId(userInfo.getId()); // OAuth ID 설정
             user.setNickname(userInfo.getNickname());
             user.setImage_url(userInfo.getImage_url());
+            user.setLevel(1L);
+            user.setAuthType(UserAuthTypeEnum.KAKAO);
             userRepository.save(user); // DB 저장
         }
 
