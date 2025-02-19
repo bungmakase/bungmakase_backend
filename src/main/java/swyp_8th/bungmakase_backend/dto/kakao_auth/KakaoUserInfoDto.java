@@ -1,4 +1,4 @@
-package swyp_8th.bungmakase_backend.dto;
+package swyp_8th.bungmakase_backend.dto.kakao_auth;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

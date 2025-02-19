@@ -51,6 +51,14 @@ kakao:
 jwt:
   secret-key: "+M/FwZHNfp1U576hW3XaPByErG3p83NqEXRRhG3EYwXrvkrPxb5TAvjqKZQI/QCbaWrU3gW+b1BaT35zpxyz3Q=="
 
+ncp:
+  s3:
+    endpoint: "https://kr.object.ncloudstorage.com"  # NCP Object Storage 엔드포인트
+    region: kr-standard  # NCP Region
+    access-key: "ncp_iam_BPAMKR37jeWJYOAf9FFP"
+    secret-key: "ncp_iam_BPKMKRYiwD6tGkpUTI8IYZNEq0V63rq2Ti"
+    bucket: bungmakase-bucket
+
 
 
 #server:
