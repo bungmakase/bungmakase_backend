@@ -52,7 +52,7 @@ public class KakaoAuthController {
     @GetMapping("/kakao/callback")
     public void kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException{
         // 1. 카카오 인가코드로 엑세스 토큰 발급
-        String accessToken = kakaoAuthService.getAccessToken(code);
+        String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
 
         // 2. 엑세스 토큰으로 유저 정보 조회 및 저장
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);

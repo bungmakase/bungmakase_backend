@@ -1,23 +1,44 @@
 package swyp_8th.bungmakase_backend.service;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
+import org.apache.tomcat.util.json.JSONParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.json.JsonParseException;
+import org.springframework.boot.json.JsonParser;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.dto.KakaoUserInfoDto;
+import swyp_8th.bungmakase_backend.dto.OAuthToken;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class KakaoAuthService {
 
+    private static final Logger log = LoggerFactory.getLogger(KakaoAuthService.class);
+
     private final UserRepository userRepository;
     private final JwtConfig jwtConfig;
-    private final WebClient webClient; // WebClient 주입
 
     private static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private static final String KAKAO_USERINFO_URL = "https://kapi.kakao.com/v2/user/me";
@@ -31,45 +52,82 @@ public class KakaoAuthService {
     /**
      * 카카오 인가 코드로 액세스 토큰 요청
      */
-    public String getAccessToken(String code) {
-        return webClient.post()
-                .uri(uriBuilder -> uriBuilder.path(KAKAO_TOKEN_URL)
-                        .queryParam("grant_type", "authorization_code")
-                        .queryParam("client_id", CLIENT_ID)
-                        .queryParam("redirect_uri", REDIRECT_URI)
-                        .queryParam("code", code)
-                        .build())
-                .retrieve()
-                .bodyToMono(TokenResponse.class)
-                .block() // 동기 방식으로 반환
-                .getAccessToken();
-    }
+    public OAuthToken getOAuthToken(String code){
 
-    /**
-     * 카카오 토큰 응답 DTO
-     */
+        RestTemplate rt = new RestTemplate();
+        Gson gson = new Gson();
 
-    private static class TokenResponse {
-        @Value("${access_token}")
-        private String accessToken;
+        // 요청 헤더 설정
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
 
-        public String getAccessToken() {
-            return accessToken;
+        // 요청 바디 설정
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("grant_type", "authorization_code");
+        params.add("client_id", CLIENT_ID);
+        params.add("redirect_uri", REDIRECT_URI);
+        params.add("code", code);
+
+        HttpEntity<MultiValueMap<String, String>> kakaoTokenRequest = new HttpEntity<>(params, headers);
+
+        try {
+            // POST 요청 실행
+            ResponseEntity<String> response = rt.exchange(
+                    KAKAO_TOKEN_URL, HttpMethod.POST, kakaoTokenRequest, String.class);
+
+            // 응답 로그 확인
+            log.info("카카오 API 응답: {}", response.getBody());
+
+            // JSON 확인을 위해 직접 파싱
+
+            // JSON 파싱 후 반환
+            OAuthToken oAuthToken = gson.fromJson(response.getBody(), OAuthToken.class);
+
+            log.info("발급된 액세스 토큰: {}", oAuthToken.getAccessToken());
+
+            if (oAuthToken == null || oAuthToken.getAccessToken() == null) {
+                throw new IllegalStateException("OAuthToken이 null이거나 accessToken이 없음!");
+            }
+
+            return oAuthToken;
+        } catch (Exception e) {
+            log.error("카카오 OAuth 토큰 요청 실패", e);
+            throw new RuntimeException("카카오 OAuth 토큰 요청 실패: " + e.getMessage());
         }
     }
+
 
 
     /**
      * 액세스 토큰으로 유저 정보 요청
      */
-    public KakaoUserInfoDto getUserInfo (String accessToken) {
-        return webClient.get()
-                .uri(KAKAO_USERINFO_URL)
-                .headers(headers -> headers.setBearerAuth(accessToken))
-                .retrieve()
-                .bodyToMono(KakaoUserInfoDto.class)
-                .block(); // 동기 방식으로 반환
+    public KakaoUserInfoDto getUserInfo(String accessToken) {
+        log.info("카카오 액세스 토큰: {}", accessToken);
+
+        if (accessToken == null || accessToken.isEmpty()) {
+            throw new IllegalArgumentException("accessToken이 없습니다");
+        }
+
+        RestTemplate rt = new RestTemplate();
+
+        //HttpHeader 오브젝트
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Authorization", "Bearer " + accessToken);
+        headers.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        //http 헤더(headers)를 가진 엔티티
+        HttpEntity<MultiValueMap<String, String>> kakaoProfileRequest =
+                new HttpEntity<>(headers);
+
+        //reqUrl로 Http 요청 , POST 방식
+        ResponseEntity<String> response =
+                rt.exchange(KAKAO_USERINFO_URL, HttpMethod.GET, kakaoProfileRequest, String.class);
+
+        KakaoUserInfoDto userInfo = new KakaoUserInfoDto(response.getBody());
+
+        return userInfo;
     }
+
 
     /**
      * 유저 정보 저장 및 JWT 발급
@@ -83,14 +141,14 @@ public class KakaoAuthService {
         if (existingUser.isPresent()) {
             // 기존 유저가 존재하면 정보 업데이트
             user = existingUser.get();
-            user.setNickname(userInfo.getKakaoAccount().getProfile().getNickname());
-            user.setImage_url(userInfo.getKakaoAccount().getProfile().getProfileImageUrl());
+            user.setNickname(userInfo.getNickname());
+            user.setImage_url(userInfo.getImage_url());
         } else {
             // 신규 유저 생성
             user = new Users();
             user.setOauthId(userInfo.getId()); // OAuth ID 설정
-            user.setNickname(userInfo.getKakaoAccount().getProfile().getNickname());
-            user.setImage_url(userInfo.getKakaoAccount().getProfile().getProfileImageUrl());
+            user.setNickname(userInfo.getNickname());
+            user.setImage_url(userInfo.getImage_url());
             userRepository.save(user); // DB 저장
         }
 
