@@ -18,7 +18,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:5173"})
+@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000"})
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
 public class KakaoAuthController {
