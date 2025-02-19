@@ -5,6 +5,8 @@ import lombok.*;
 import swyp_8th.bungmakase_backend.domain.enums.UserAuthTypeEnum;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -33,8 +35,6 @@ public class Users {
 
     private String password; // 이메일 로그인 시 필요
 
-    private String guestId; // 게스트 로그인 시 필요
-
     @Column(columnDefinition = "BIGINT DEFAULT 1")
     private Long level = 1L;
 
@@ -50,5 +50,8 @@ public class Users {
     protected void onCreate() {
         this.createdAt = LocalDateTime.now();
     }
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true) // ✅ 추가
+    private GuestSession guestSession;
 
 }

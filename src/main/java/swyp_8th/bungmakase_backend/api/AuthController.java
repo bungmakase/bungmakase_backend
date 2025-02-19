@@ -6,11 +6,14 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
+import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.AuthService;
 
+import java.util.HashMap;
 import java.util.Map;
 
 @RestController
@@ -44,5 +47,22 @@ public class AuthController {
                 .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
                 .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
     }
+
+    @PostMapping("/guest")
+    public ResponseEntity<ResponseTemplate<Map<String, Object>>> startGuestMode() {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            Users guestUser = authService.createGuestUser();
+
+            return ResponseEntity.ok(new ResponseTemplate<>(SuccessCode.CREATED_201,null));
+
+        } catch (Exception e) {
+
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
+
+
 
 }

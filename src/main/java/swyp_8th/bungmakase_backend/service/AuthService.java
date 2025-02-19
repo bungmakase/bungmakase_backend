@@ -2,18 +2,23 @@ package swyp_8th.bungmakase_backend.service;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
+import swyp_8th.bungmakase_backend.domain.GuestSession;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.domain.enums.UserAuthTypeEnum;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
+import swyp_8th.bungmakase_backend.repository.GuestSessionRepository;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
+
+import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +26,7 @@ import swyp_8th.bungmakase_backend.repository.UserRepository;
 public class AuthService {
 
     private final UserRepository userRepository;
+    private final GuestSessionRepository guestSessionRepository;
     private final PasswordEncoder passwordEncoder;
     private final FileStorageService fileStorageService; // 파일 저장 서비스
     private final JwtConfig jwtConfig;
@@ -69,5 +75,36 @@ public class AuthService {
         userRepository.save(newUser);
 
         return jwtConfig.generateToken(newUser.getId());
+    }
+
+    public Users createGuestUser() {
+
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime expiresAt = now.plusHours(24);  // 24시간 유지
+
+        Users guestUser = Users.builder()
+                .createdAt(now)
+                .authType(UserAuthTypeEnum.GUEST)
+                .build();
+
+        userRepository.save(guestUser);
+
+        GuestSession guestSession = GuestSession.builder()
+                .user(guestUser)
+                .expiresAt(now.plusHours(24))
+                .build();
+
+        guestSessionRepository.save(guestSession);
+
+        return guestUser;
+
+    }
+
+    // 매일 자정에 만료된 세션 삭제
+    @Scheduled(cron = "0 0 0 * * ?")
+    @Transactional
+    public void deleteExpiredGuestSessions() {
+        LocalDateTime now = LocalDateTime.now();
+        guestSessionRepository.deleteExpiredSessions(now);
     }
 }

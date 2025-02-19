@@ -1,10 +1,15 @@
 package swyp_8th.bungmakase_backend.repository;
 
+import jdk.jfr.Registered;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 import swyp_8th.bungmakase_backend.domain.Users;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.UUID;
 
+@Repository
 public interface UserRepository extends JpaRepository<Users, Long> {
     Optional<Users> findByOauthId(String oauthId);
 
@@ -15,4 +20,8 @@ public interface UserRepository extends JpaRepository<Users, Long> {
     boolean existsByEmail(String email);
 
     boolean existsByNickname(String nickname);
+
+    // 만료된 게스트 유저 삭제
+    void deleteUsersById(UUID id);
+
 }
