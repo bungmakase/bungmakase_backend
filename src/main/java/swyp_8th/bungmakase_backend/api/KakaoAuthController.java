@@ -59,7 +59,7 @@ public class KakaoAuthController {
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
         // 3. 리다이렉트 (JWT 포함)
-        response.sendRedirect("/");
+        response.sendRedirect("http://localhost:3000");
         response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken);
     }
 
