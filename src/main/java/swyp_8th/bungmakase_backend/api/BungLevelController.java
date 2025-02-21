@@ -5,7 +5,6 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
-import swyp_8th.bungmakase_backend.api.dto.UserLevelDto;
 import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
@@ -17,11 +16,9 @@ import swyp_8th.bungmakase_backend.service.BungLevelService;
 @RequestMapping("/api/level")
 public class BungLevelController {
 
-    private final BungLevelService service;
     private final BungLevelService bungLevelService;
 
-    public BungLevelController(BungLevelService service, BungLevelService bungLevelService) {
-        this.service = service;
+    public BungLevelController( BungLevelService bungLevelService) {
         this.bungLevelService = bungLevelService;
     }
 
@@ -53,6 +50,9 @@ public class BungLevelController {
         }
 
     }
+
+
+
 
     private String extractToken(String header) {
         if(header != null && header.startsWith("Bearer ")) { //delete this method if the logic duplicated
