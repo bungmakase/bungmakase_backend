@@ -96,13 +96,17 @@ public class AuthController {
 
     @PostMapping(value = "/login/email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> loginWithEmail(
-            @RequestBody EmailLoginRequestDto request) {
+            @RequestBody EmailLoginRequestDto request,HttpServletResponse response) {
 
         try {
             String jwt = authService.loginWithEmail(request);
 
+            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+
+            // 2. 응답 헤더에 쿠키 추가
+            response.setHeader("Set-Cookie", cookieValue);
+
             return ResponseEntity.status(HttpStatus.OK)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
                     .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
