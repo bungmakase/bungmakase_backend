@@ -1,5 +1,6 @@
 package swyp_8th.bungmakase_backend.config;
 
+import io.jsonwebtoken.security.SignatureException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import io.jsonwebtoken.Jwts;
@@ -27,4 +28,16 @@ public class JwtConfig {
                 .signWith(SignatureAlgorithm.HS256, SECRET_KEY)
                 .compact();
     }
+
+    // 토큰 검증
+    public boolean validateToken(String token) {
+        try {
+            Jwts.parser().setSigningKey(SECRET_KEY).parseClaimsJws(token.replace("Bearer ", ""));
+            return true;
+        } catch (SignatureException | IllegalArgumentException e) {
+            return false;
+        }
+    }
+
+
 }
