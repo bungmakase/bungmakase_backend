@@ -52,7 +52,8 @@ public class KakaoAuthController {
     }
 
     @GetMapping("/kakao/callback")
-    public void kakaoLogin(@RequestParam String code, HttpServletRequest request, HttpServletResponse response) throws IOException{
+    public void kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state,
+                            HttpServletResponse response) throws IOException{
         // 1. 카카오 인가코드로 엑세스 토큰 발급
         String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
 
@@ -60,12 +61,9 @@ public class KakaoAuthController {
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-        // 3. 요청 호스트 확인
-        String host = request.getHeader("Host");
-        System.out.println("Host Header: " + host);  // 디버깅용
-
+        // 상태(state) 기반으로 프론트엔드 URL 결정
         String frontendUrl;
-        if (host != null && host.contains("localhost")) {
+        if ("local".equals(state)) {
             frontendUrl = "http://localhost:3000";
         } else {
             frontendUrl = "https://bungmakase.vercel.app";
