@@ -62,11 +62,11 @@ public class KakaoAuthController {
 
 
         // 3. 요청 호스트 확인
-
-        String origin = request.getHeader("Origin");
+        String host = request.getHeader("Host");
+        System.out.println("Host Header: " + host);  // 디버깅용
 
         String frontendUrl;
-        if (origin != null && origin.contains("localhost")) {
+        if (host != null && host.contains("localhost")) {
             frontendUrl = "http://localhost:3000";
         } else {
             frontendUrl = "https://bungmakase.vercel.app";
