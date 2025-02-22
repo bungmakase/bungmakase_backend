@@ -54,4 +54,13 @@ public class Users {
     @OneToOne(mappedBy = "user", cascade = CascadeType.REMOVE, orphanRemoval = true) // ✅ 추가
     private GuestSession guestSession;
 
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBungDogam> userBungDogams = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBungLog> userBungLogs = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BungShopReview> bungShopReviews = new ArrayList<>();
+
 }
