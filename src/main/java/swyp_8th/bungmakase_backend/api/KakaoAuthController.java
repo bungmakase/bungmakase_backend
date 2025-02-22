@@ -61,7 +61,7 @@ public class KakaoAuthController {
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-        // 상태(state) 기반으로 프론트엔드 URL 결정
+    
         String frontendUrl;
         if ("local".equals(state)) {
             frontendUrl = "http://localhost:3000";
