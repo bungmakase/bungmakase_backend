@@ -10,6 +10,7 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
+                .allowedOrigins("*")
                 .allowedOrigins(
                         "https://bungmakase.vercel.app", // Vercel 배포 URL
                         "http://localhost:3000"     // React 로컬 개발 서버
