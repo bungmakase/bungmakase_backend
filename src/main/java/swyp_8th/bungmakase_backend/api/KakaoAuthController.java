@@ -60,6 +60,7 @@ public class KakaoAuthController {
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
+
         // 3. 요청 호스트 확인
 
         String origin = request.getHeader("Origin");
