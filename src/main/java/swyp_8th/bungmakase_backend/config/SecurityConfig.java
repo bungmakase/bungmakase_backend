@@ -19,7 +19,7 @@ public class SecurityConfig {
         http
                 .authorizeHttpRequests(auth -> auth
                         // 회원가입, 로그인 API는 인증 없이 허용
-                        .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/**").permitAll()
                         // Swagger 허용 URL
                         .requestMatchers(
                                 "/swagger-ui/**",
