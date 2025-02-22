@@ -21,6 +21,7 @@ public interface UserRepository extends JpaRepository<Users, Long> {
 
     boolean existsByNickname(String nickname);
 
-
+    // 1) Users 객체 직접 반환 (조회 실패 시 null 반환)
+    Users findByNickname(String nickname);
 
 }

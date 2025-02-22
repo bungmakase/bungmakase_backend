@@ -26,4 +26,7 @@ public class UserBungDogam {
 
     @Column(columnDefinition = "BOOLEAN DEFAULT FALSE")
     private Boolean found = false;
+
+    @Column(name = "tags", columnDefinition = "TEXT")
+    private String tags;
 }
