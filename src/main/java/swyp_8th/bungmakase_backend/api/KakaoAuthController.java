@@ -1,5 +1,7 @@
 package swyp_8th.bungmakase_backend.api;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
@@ -50,7 +52,7 @@ public class KakaoAuthController {
     }
 
     @GetMapping("/kakao/callback")
-    public void kakaoLogin(@RequestParam String code, HttpServletResponse response) throws IOException{
+    public void kakaoLogin(@RequestParam String code, HttpServletRequest request, HttpServletResponse response) throws IOException{
         // 1. 카카오 인가코드로 엑세스 토큰 발급
         String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
 
@@ -58,9 +60,24 @@ public class KakaoAuthController {
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-        // 3. 리다이렉트 (JWT 포함)
-        response.sendRedirect("/");
-        response.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + jwtToken);
+        // 3. 요청 호스트 확인
+
+        String origin = request.getHeader("Origin");
+
+        String frontendUrl;
+        if (origin != null && origin.contains("localhost")) {
+            frontendUrl = "http://localhost:3000";
+        } else {
+            frontendUrl = "https://bungmakase.vercel.app";
+        }
+
+        // 4. 응답 헤더에 쿠키 추가
+
+        String cookieValue = "token=" + jwtToken + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+        response.setHeader("Set-Cookie", cookieValue);
+
+
+        response.sendRedirect(frontendUrl);
     }
 
 

@@ -1,5 +1,8 @@
 package swyp_8th.bungmakase_backend.api;
 
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -52,15 +55,23 @@ public class AuthController {
     @PostMapping(value = "/signup/email", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<Map<String, String>>> signup(
             @RequestPart("userData") SignupRequestDto requestDto,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
+            @RequestPart(value = "image", required = false) MultipartFile image, HttpServletResponse response) {
 
         try {
+            // 1. 회원가입 처리 및 JWT 생성
             String jwt = authService.signup(requestDto, image);
 
+            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+
+            // 2. 응답 헤더에 쿠키 추가
+            response.setHeader("Set-Cookie", cookieValue);
+
+
+            // 3. 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
                     .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
-        } catch (Exception e){
+
+        } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
         }
@@ -85,13 +96,17 @@ public class AuthController {
 
     @PostMapping(value = "/login/email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> loginWithEmail(
-            @RequestBody EmailLoginRequestDto request) {
+            @RequestBody EmailLoginRequestDto request,HttpServletResponse response) {
 
         try {
             String jwt = authService.loginWithEmail(request);
 
+            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+
+            // 2. 응답 헤더에 쿠키 추가
+            response.setHeader("Set-Cookie", cookieValue);
+
             return ResponseEntity.status(HttpStatus.OK)
-                    .header(HttpHeaders.AUTHORIZATION, "Bearer " + jwt)
                     .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)

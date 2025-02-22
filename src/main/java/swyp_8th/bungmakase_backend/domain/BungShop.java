@@ -6,6 +6,8 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -36,4 +38,10 @@ public class BungShop {
 
     @Column(name = "tastes", columnDefinition = "TEXT")
     private String tastes; // JSON 또는 콤마 구분 문자열로 저장 가능
+
+    @OneToMany(mappedBy = "bungShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BungShopReview> bungShopReviews = new ArrayList<>();
+
+    @OneToMany(mappedBy = "bungShop", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<BungShopImage> bungShopImages = new ArrayList<>();
 }
