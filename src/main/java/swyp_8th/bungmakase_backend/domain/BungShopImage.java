@@ -17,7 +17,7 @@ public class BungShopImage {
     @GeneratedValue
     private UUID id;
 
-    @ManyToOne
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "bung_shop_id")
     private BungShop bungShop;
 

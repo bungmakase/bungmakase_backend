@@ -10,9 +10,7 @@ import swyp_8th.bungmakase_backend.repository.BungDogamRepository;
 import swyp_8th.bungmakase_backend.repository.UserBungDogamRepository;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
 
-import java.math.BigInteger;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
