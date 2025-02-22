@@ -5,12 +5,15 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
+import swyp_8th.bungmakase_backend.api.dto.RankingResponseDto;
 import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.BungLevelService;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/api/level")
@@ -49,6 +52,20 @@ public class BungLevelController {
 
         }
 
+    }
+
+    @GetMapping("/rankings")
+    public ResponseEntity<ResponseTemplate<List<RankingResponseDto>>> getRankings() {
+        try {
+            List<RankingResponseDto> rankings = bungLevelService.getRankings();
+            ResponseTemplate<List<RankingResponseDto>> response =
+                    new ResponseTemplate<>(SuccessCode.SUCCESS_200, rankings);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            ResponseTemplate<List<RankingResponseDto>> failResponse =
+                    new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null);
+            return ResponseEntity.status(FailureCode.SERVER_ERROR_500.getCode()).body(failResponse);
+        }
     }
 
 
