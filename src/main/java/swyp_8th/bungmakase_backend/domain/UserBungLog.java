@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -32,4 +34,7 @@ public class UserBungLog {
 
     @Column(name = "tags", columnDefinition = "TEXT")
     private String tags;
+
+    @OneToMany(mappedBy = "userBungLog", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<UserBungImage> userBungImages = new ArrayList<>();
 }
