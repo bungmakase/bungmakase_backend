@@ -6,16 +6,15 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
-import swyp_8th.bungmakase_backend.dto.bung_map.AddShopRequest;
-import swyp_8th.bungmakase_backend.dto.bung_map.AddShopResponse;
-import swyp_8th.bungmakase_backend.dto.bung_map.MarkerResponseDto;
-import swyp_8th.bungmakase_backend.dto.bung_map.ShopReviewRequest;
+import swyp_8th.bungmakase_backend.dto.bung_level.ReviewListResponse;
+import swyp_8th.bungmakase_backend.dto.bung_map.*;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.BungMapService;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -115,4 +114,75 @@ public class BungMapController {
         }
     }
 
+    @GetMapping("/home")
+    public ResponseEntity<ResponseTemplate<ShopInfoResponse>> getShopHome(@RequestParam("shopId") UUID shopId) {
+        try {
+            // 1. 유효성 검사
+            if (shopId == null) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+            }
+
+            // 2. 서비스 호출
+            ShopInfoResponse shopInfo = mapService.getShopInfo(shopId);
+
+            return ResponseEntity.ok()
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, shopInfo));
+
+        } catch (NoSuchElementException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(new ResponseTemplate<>(FailureCode.NOT_FOUND_404, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
+
+    @GetMapping("/home/photos")
+    public ResponseEntity<ResponseTemplate<List<ShopPhotoResponse>>> getShopPhotos(@RequestParam("shopId") UUID shopId) {
+        try {
+            // 유효성 검사
+            if (shopId == null) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+            }
+
+            // 서비스 호출
+            List<ShopPhotoResponse> photos = mapService.getShopPhotos(shopId);
+
+            return ResponseEntity.ok()
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, photos));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
+
+    @GetMapping("/home/reviews")
+    public ResponseEntity<ResponseTemplate<List<ReviewListResponse>>> getShopReviews(@RequestParam("shopId") UUID shopId) {
+        try {
+            // 유효성 검사
+            if (shopId == null) {
+                return ResponseEntity.badRequest()
+                        .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+            }
+
+            // 서비스 호출
+            List<ReviewListResponse> reviews = mapService.getShopReviews(shopId);
+
+            return ResponseEntity.ok()
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, reviews));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
 }

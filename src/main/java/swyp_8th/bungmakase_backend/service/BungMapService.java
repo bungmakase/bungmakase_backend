@@ -12,10 +12,8 @@ import swyp_8th.bungmakase_backend.domain.BungShop;
 import swyp_8th.bungmakase_backend.domain.BungShopImage;
 import swyp_8th.bungmakase_backend.domain.BungShopReview;
 import swyp_8th.bungmakase_backend.domain.Users;
-import swyp_8th.bungmakase_backend.dto.bung_map.AddShopRequest;
-import swyp_8th.bungmakase_backend.dto.bung_map.AddShopResponse;
-import swyp_8th.bungmakase_backend.dto.bung_map.MarkerResponseDto;
-import swyp_8th.bungmakase_backend.dto.bung_map.ShopReviewRequest;
+import swyp_8th.bungmakase_backend.dto.bung_level.ReviewListResponse;
+import swyp_8th.bungmakase_backend.dto.bung_map.*;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.repository.BungShopImageRepository;
@@ -24,10 +22,7 @@ import swyp_8th.bungmakase_backend.repository.BungShopReviewRepository;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
 
 import java.time.LocalTime;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -184,5 +179,75 @@ public class BungMapService {
         response.setShopId(shopId);
 
         return response;
+    }
+
+    public ShopInfoResponse getShopInfo(UUID shopId) {
+        // 1. 가게 정보 조회
+        BungShop shop = bungShopRepository.findById(shopId)
+                .orElseThrow(() -> new NoSuchElementException("가게 정보를 찾을 수 없습니다."));
+
+        // 2. 이미지 URL 리스트 조회
+        List<BungShopImage> images = bungShopImageRepository.findByBungShopId(shopId);
+        List<String> imageUrls = images.stream()
+                .map(BungShopImage::getImageUrl)
+                .collect(Collectors.toList());
+
+        // 3. Taste 정보를 리스트로 변환
+        List<String> tastes = Arrays.asList(shop.getTastes().split(","));
+
+        // 4. Response DTO 생성
+        ShopInfoResponse response = new ShopInfoResponse();
+        response.setShopId(shop.getId().toString());
+        response.setShopName(shop.getShopName());
+        response.setStartTime(shop.getStartTime().toString());
+        response.setEndTime(shop.getEndTime().toString());
+        response.setAddress(shop.getShopAddress());
+        response.setTastes(tastes);
+        response.setPhone(shop.getPhoneNumber());
+        response.setImageUrls(imageUrls);
+
+        return response;
+    }
+
+    public List<ShopPhotoResponse> getShopPhotos(UUID shopId) {
+        // 가게 존재 여부 확인
+        BungShop shop = bungShopRepository.findById(shopId)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 요청 - 유효하지 않은 shopId"));
+
+        // 해당 가게의 이미지 리스트 조회
+        List<BungShopImage> images = bungShopImageRepository.findByBungShopId(shopId);
+
+        // DTO 변환
+        return images.stream()
+                .map(image -> new ShopPhotoResponse(
+                        image.getId().toString(),
+                        image.getImageUrl(),
+                        image.getUploadedAt()
+                ))
+                .collect(Collectors.toList());
+    }
+
+    public List<ReviewListResponse> getShopReviews(UUID shopId) {
+        // 가게 존재 여부 확인
+        BungShop shop = bungShopRepository.findById(shopId)
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 요청 - 유효하지 않은 shopId"));
+
+        // 해당 가게의 리뷰 리스트 조회
+        List<BungShopReview> reviews = bungShopReviewRepository.findByBungShopId(shopId);
+
+        // DTO 변환
+        return reviews.stream()
+                .map(review -> new ReviewListResponse(
+                        review.getId(),
+                        review.getUser().getImage_url(),
+                        review.getUser().getLevel(),
+                        review.getUser().getNickname(),
+                        review.getBungShopImages().stream()
+                                .map(BungShopImage::getImageUrl)
+                                .collect(Collectors.toList()),
+                        review.getReviewText(),
+                        review.getCreatedAt()
+                ))
+                .collect(Collectors.toList());
     }
 }
