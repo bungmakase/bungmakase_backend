@@ -4,10 +4,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import swyp_8th.bungmakase_backend.api.dto.LogListResponseDto;
-import swyp_8th.bungmakase_backend.api.dto.UpdateNicknameRequestDto;
-import swyp_8th.bungmakase_backend.api.dto.UpdateNicknameResponseDto;
-import swyp_8th.bungmakase_backend.api.dto.UserProfileResponseDto;
+import swyp_8th.bungmakase_backend.api.dto.*;
+import swyp_8th.bungmakase_backend.exception.ResourceNotFoundException;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
@@ -103,6 +101,81 @@ public class ProfileController {
             return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
         } catch (Exception ex) {
             ResponseTemplate<List<LogListResponseDto>> failResponse =
+                    new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null);
+            return ResponseEntity.status(FailureCode.SERVER_ERROR_500.getCode()).body(failResponse);
+        }
+    }
+
+    @GetMapping("/logs")
+    public ResponseEntity<ResponseTemplate<LogResponseDto>> getBungLogDetail(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam("logId") String logId) {
+
+        if (token == null || token.isEmpty()) {
+            ResponseTemplate<LogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
+            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
+        }
+
+        try {
+            LogResponseDto detail = profileService.getBungLogDetail(token, logId);
+            ResponseTemplate<LogResponseDto> response =
+                    new ResponseTemplate<>(SuccessCode.SUCCESS_200, detail);
+            response.setMessage("붕어빵 기록 조회 성공");
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException ex) {
+            ResponseTemplate<LogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.NOT_FOUND_404, null);
+            failResponse.setMessage(ex.getMessage());
+            return ResponseEntity.status(FailureCode.NOT_FOUND_404.getCode()).body(failResponse);
+        } catch (UnauthorizedException ex) {
+            ResponseTemplate<LogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
+            failResponse.setMessage(ex.getMessage());
+            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
+        } catch (Exception ex) {
+            ResponseTemplate<LogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null);
+            return ResponseEntity.status(FailureCode.SERVER_ERROR_500.getCode()).body(failResponse);
+        }
+    }
+
+    @PutMapping(value = "/logs", consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseTemplate<UpdateLogResponseDto>> updateBungLog(
+            @CookieValue(value = "token", required = false) String token,
+            @RequestParam("logId") String logId,
+            @RequestPart("logData") UpdateLogRequestDto updateBungLogDto,
+            @RequestPart(value = "image", required = false) MultipartFile image) {
+
+        if (token == null || token.isEmpty()) {
+            ResponseTemplate<UpdateLogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
+            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
+        }
+
+        try {
+            UpdateLogResponseDto updatedLog = profileService.updateBungLog(token, logId, updateBungLogDto, image);
+            ResponseTemplate<UpdateLogResponseDto> response =
+                    new ResponseTemplate<>(SuccessCode.SUCCESS_200, updatedLog);
+            response.setMessage("붕어빵 기록 수정 성공");
+            return ResponseEntity.ok(response);
+        } catch (ResourceNotFoundException ex) {
+            ResponseTemplate<UpdateLogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.NOT_FOUND_404, null);
+            failResponse.setMessage(ex.getMessage());
+            return ResponseEntity.status(FailureCode.NOT_FOUND_404.getCode()).body(failResponse);
+        } catch (UnauthorizedException ex) {
+            ResponseTemplate<UpdateLogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
+            failResponse.setMessage(ex.getMessage());
+            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
+        } catch (IllegalArgumentException ex) {
+            ResponseTemplate<UpdateLogResponseDto> failResponse =
+                    new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null);
+            failResponse.setMessage(ex.getMessage());
+            return ResponseEntity.status(FailureCode.BAD_REQUEST_400.getCode()).body(failResponse);
+        } catch (Exception ex) {
+            ResponseTemplate<UpdateLogResponseDto> failResponse =
                     new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null);
             return ResponseEntity.status(FailureCode.SERVER_ERROR_500.getCode()).body(failResponse);
         }
