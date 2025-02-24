@@ -70,6 +70,8 @@ public class AuthService {
                 .nickname(requestDto.getNickname())
                 .image_url(profileImageUrl)
                 .level(1L)
+                .bungCount(0L)
+                .recentCount(0L)
                 .authType(UserAuthTypeEnum.EMAIL)
                 .build();
 

@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +28,10 @@ public class UserBungLog {
     @JoinColumn(name = "bung_id")
     private BungDogam bung;
 
-    private LocalDateTime logDate;
+    private LocalDate logDate = LocalDate.now();
 
-    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 1")
-    private Long count = 1L;
+    @Column(nullable = false, columnDefinition = "BIGINT DEFAULT 0")
+    private Long count = 0L;
 
     @Column(name = "tags", columnDefinition = "TEXT")
     private String tags;

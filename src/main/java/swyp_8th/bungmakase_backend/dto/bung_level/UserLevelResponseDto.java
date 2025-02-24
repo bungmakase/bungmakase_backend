@@ -1,4 +1,4 @@
-package swyp_8th.bungmakase_backend.api.dto;
+package swyp_8th.bungmakase_backend.dto.bung_level;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

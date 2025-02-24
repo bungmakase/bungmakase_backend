@@ -1,32 +1,27 @@
 package swyp_8th.bungmakase_backend.service;
 
-import io.swagger.v3.oas.annotations.servers.Server;
+import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import swyp_8th.bungmakase_backend.api.dto.RankingResponseDto;
-import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
+import swyp_8th.bungmakase_backend.dto.profile.RankingResponseDto;
+import swyp_8th.bungmakase_backend.dto.bung_level.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
-import swyp_8th.bungmakase_backend.repository.MyUserRepository;
 import swyp_8th.bungmakase_backend.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service
+@RequiredArgsConstructor
 public class BungLevelService {
 
-    private final MyUserRepository myUserRepository;
+    private final UserRepository userRepository;
 
-    public BungLevelService(MyUserRepository myUserRepository) {
-        this.myUserRepository = myUserRepository;
-    }
 
-    public UserLevelResponseDto getUserLevel(String token) {
+    public UserLevelResponseDto getUserLevel(UUID userId) {
         try {
-            UUID userId = UUID.fromString(token);
-            Users user = myUserRepository.findById(userId)
+            Users user = userRepository.findById(userId)
                     .orElseThrow(() -> new UnauthorizedException("User not Found"));
             return new UserLevelResponseDto(user.getNickname(), user.getLevel(), user.getBungCount());
         } catch (IllegalArgumentException exception) {
@@ -35,20 +30,58 @@ public class BungLevelService {
 
     }
 
-    public List<RankingResponseDto> getRankings() {
-        // View the top 20 users by level and recent fish-bun
-        List<Users> topUsers = myUserRepository.findTop20ByOrderByLevelDescRecentCountDesc();
+    public List<RankingResponseDto> get20Rankings() {
+
+        List<Users> topUsers = userRepository.findTop20ByOrderByLevelDescRecentCountDesc();
         List<RankingResponseDto> rankingList = new ArrayList<>();
 
-        int rank = 1;
+        long displayRank = 1L; // 화면에 표시할 순위
+        Long previousCount = null;
+
         for (Users user : topUsers) {
-            // 여기서는 Users 엔티티의 recentCount 필드를 총 먹은 붕어빵 수로 사용합니다.
-            rankingList.add(new RankingResponseDto(rank, user.getNickname(), user.getLevel(), user.getRecentCount()));
-            rank++;
+            Long currentCount = user.getRecentCount();
+
+            if (previousCount == null || currentCount.equals(previousCount)) {
+                rankingList.add(new RankingResponseDto(displayRank, user.getNickname(), user.getLevel(), currentCount));
+                previousCount = currentCount;
+            }
+
+            else{
+                displayRank+=1;
+                rankingList.add(new RankingResponseDto(displayRank, user.getNickname(), user.getLevel(), currentCount));
+                previousCount = currentCount;
+            }
+
         }
+
         return rankingList;
     }
 
+    public List<RankingResponseDto> getTop3() {
 
+        List<Users> topUsers = userRepository.findTop3ByOrderByLevelDescRecentCountDesc();
+        List<RankingResponseDto> rankingList = new ArrayList<>();
+
+        long displayRank = 1L; // 화면에 표시할 순위
+        Long previousCount = null;
+
+        for (Users user : topUsers) {
+            Long currentCount = user.getRecentCount();
+
+            if (previousCount == null || currentCount.equals(previousCount)) {
+                rankingList.add(new RankingResponseDto(displayRank, user.getNickname(), user.getLevel(), currentCount));
+                previousCount = currentCount;
+            }
+
+            else{
+                displayRank+=1;
+                rankingList.add(new RankingResponseDto(displayRank, user.getNickname(), user.getLevel(), currentCount));
+                previousCount = currentCount;
+            }
+
+        }
+
+        return rankingList;
+    }
 
 }

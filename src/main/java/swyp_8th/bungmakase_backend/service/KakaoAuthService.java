@@ -139,6 +139,8 @@ public class KakaoAuthService {
             user.setNickname(userInfo.getNickname());
             user.setImage_url(userInfo.getImage_url());
             user.setLevel(1L);
+            user.setBungCount(0L);
+            user.setRecentCount(0L);
             user.setAuthType(UserAuthTypeEnum.KAKAO);
             userRepository.save(user); // DB 저장
         }
