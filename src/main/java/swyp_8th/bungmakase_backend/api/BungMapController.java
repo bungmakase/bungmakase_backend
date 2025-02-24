@@ -4,7 +4,12 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+import swyp_8th.bungmakase_backend.config.JwtConfig;
+import swyp_8th.bungmakase_backend.dto.bung_map.AddShopRequest;
+import swyp_8th.bungmakase_backend.dto.bung_map.AddShopResponse;
 import swyp_8th.bungmakase_backend.dto.bung_map.MarkerResponseDto;
+import swyp_8th.bungmakase_backend.dto.bung_map.ShopReviewRequest;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
@@ -21,6 +26,7 @@ import java.util.UUID;
 public class BungMapController {
 
     private final BungMapService mapService;
+    private final JwtConfig jwtConfig;
 
     @GetMapping("/markers")
     public ResponseEntity<ResponseTemplate<List<MarkerResponseDto>>> getAllMarkers() {
@@ -72,4 +78,41 @@ public class BungMapController {
                     .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
         }
     }
+
+    @PostMapping(value = "/reviews",  consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseTemplate<Void>> addShopReview(
+            @CookieValue("token") String token,
+            @RequestPart("reviewData") ShopReviewRequest reviewData,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) {
+
+        try {
+            UUID userId = jwtConfig.getUserIdFromToken(token);
+
+            mapService.addShopReview(userId, reviewData, images);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+    }
+
+    @PostMapping(value = "/shops",  consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseTemplate<AddShopResponse>> addShop(
+            @RequestPart("shopData") AddShopRequest shopData,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) {
+
+        try {
+
+            AddShopResponse response = mapService.addNewShop(shopData, images);
+
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, response));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+    }
+
 }
