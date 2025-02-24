@@ -16,7 +16,7 @@ import java.util.UUID;
 public class BungDogam {
 
     @Id
-    @GeneratedValue
+    @GeneratedValue(strategy = GenerationType.AUTO)
     private BigInteger id;
 
     @Column(nullable = false)
