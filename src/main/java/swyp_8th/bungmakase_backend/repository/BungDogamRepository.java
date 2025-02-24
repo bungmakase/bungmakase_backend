@@ -5,9 +5,15 @@ import swyp_8th.bungmakase_backend.domain.BungDogam;
 import swyp_8th.bungmakase_backend.domain.Users;
 
 import java.math.BigInteger;
+import java.util.Optional;
 import java.util.UUID;
 
 public interface BungDogamRepository extends JpaRepository<BungDogam, UUID> {
 
     BungDogam findById(int id);
+
+    Optional<BungDogam> findByBungName(String bungName);
+
 }
+
+
