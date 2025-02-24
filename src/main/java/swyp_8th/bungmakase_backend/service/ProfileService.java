@@ -1,6 +1,8 @@
 package swyp_8th.bungmakase_backend.service;
 
 import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
@@ -8,24 +10,26 @@ import swyp_8th.bungmakase_backend.domain.BungDogam;
 import swyp_8th.bungmakase_backend.domain.UserBungImage;
 import swyp_8th.bungmakase_backend.domain.UserBungLog;
 import swyp_8th.bungmakase_backend.domain.Users;
+import swyp_8th.bungmakase_backend.dto.bung_level.BungLogRequestDto;
 import swyp_8th.bungmakase_backend.dto.profile.*;
 import swyp_8th.bungmakase_backend.exception.ResourceNotFoundException;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.repository.BungDogamRepository;
-import swyp_8th.bungmakase_backend.repository.MyUserRepository;
 import swyp_8th.bungmakase_backend.repository.UserBungImageRepository;
 import swyp_8th.bungmakase_backend.repository.UserBungLogRepository;
+import swyp_8th.bungmakase_backend.repository.UserRepository;
 
-import java.time.LocalDate;
-import java.time.LocalDateTime;
+
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
+@RequiredArgsConstructor
 public class ProfileService {
 
-    private final MyUserRepository myUserRepository;
+    private final UserRepository userRepository;
     private final JwtConfig jwtConfig;
     private final FileStorageService fileStorageService;
     private final UserBungLogRepository userBungLogRepository;
@@ -34,25 +38,11 @@ public class ProfileService {
 
 
 
-    public ProfileService(MyUserRepository myUserRepository,
-                          JwtConfig jwtConfig,
-                          FileStorageService fileStorageService,
-                          UserBungLogRepository userBungLogRepository,
-                          BungDogamRepository bungDogamRepository,
-                          UserBungImageRepository userBungImageRepository) {
-        this.myUserRepository = myUserRepository;
-        this.jwtConfig = jwtConfig;
-        this.fileStorageService = fileStorageService;
-        this.userBungLogRepository = userBungLogRepository;
-        this.bungDogamRepository = bungDogamRepository;
-        this.userBungImageRepository = userBungImageRepository;
-
-    }
 
     public UserProfileResponseDto getProfile(String token) {
         //Using JwtConfig verify the token and extract the user Id(UUID)
         UUID userId = jwtConfig.getUserIdFromToken(token);
-        Users user = myUserRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("user not found"));
+        Users user = userRepository.findById(userId).orElseThrow(() -> new UnauthorizedException("user not found"));
 
 
         return new UserProfileResponseDto(user.getNickname(), user.getLevel(), user.getImage_url());
@@ -63,7 +53,7 @@ public class ProfileService {
     public void updateUserProfile(String token, UpdateNicknameRequestDto updateProfileDto, MultipartFile image) {
         // 토큰 검증 및 사용자 ID 추출
         UUID userId = jwtConfig.getUserIdFromToken(token);
-        Users user = myUserRepository.findById(userId)
+        Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
         // 닉네임 업데이트
@@ -76,14 +66,14 @@ public class ProfileService {
         }
 
         // 변경 사항 저장 (트랜잭션 내에서 자동 플러시)
-        myUserRepository.save(user);
+        userRepository.save(user);
     }
 
     @Transactional
     public List<LogListResponseDto> getUserBungLogs(String token) {
         // 토큰을 통해 사용자 ID(UUID) 추출
         UUID userId = jwtConfig.getUserIdFromToken(token);
-        Users user = myUserRepository.findById(userId)
+        Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
         // 사용자의 붕어빵 기록들을 최신 순으로 조회
@@ -105,7 +95,7 @@ public class ProfileService {
     public LogResponseDto getBungLogDetail(String token, String logId) {
         // JWT 토큰에서 사용자 ID(UUID) 추출
         UUID userId = jwtConfig.getUserIdFromToken(token);
-        Users user = myUserRepository.findById(userId)
+        Users user = userRepository.findById(userId)
                 .orElseThrow(() -> new UnauthorizedException("User not found"));
 
         // logId 문자열을 UUID로 변환
@@ -136,9 +126,6 @@ public class ProfileService {
             tags = List.of(bungLog.getTags().split(","));
         }
 
-        // logDate의 날짜 부분 추출
-        LocalDate date = bungLog.getLogDate().toLocalDate();
-
         // BungDogam의 bungName 조회
         String bungName = bungLog.getBung().getBungName();
 
@@ -146,82 +133,59 @@ public class ProfileService {
                 bungLog.getId().toString(),
                 bungName,
                 imageUrls,
-                date,
+                bungLog.getLogDate(),
                 bungLog.getCount(),
                 tags
         );
     }
 
     @Transactional
-    public UpdateLogResponseDto updateBungLog(String token, String logId, UpdateLogRequestDto updateDto, MultipartFile image) {
-        // 1. JWT 토큰에서 사용자 ID 추출
-        UUID userId = jwtConfig.getUserIdFromToken(token);
-        Users user = myUserRepository.findById(userId)
-                .orElseThrow(() -> new UnauthorizedException("User not found"));
+    public void updateBungLog(UUID userId, UUID logId, BungLogRequestDto updateDto, List<MultipartFile> images) {
+        log.info("붕어빵 로그 수정 시작: logId={}, userId={}", logId, userId);
 
-        // 2. logId를 UUID로 파싱
-        UUID logUUID;
-        try {
-            logUUID = UUID.fromString(logId);
-        } catch (IllegalArgumentException e) {
-            throw new ResourceNotFoundException("붕어빵 기록을 찾을 수 없습니다.");
-        }
+        // 붕어빵 로그 찾기
+        UserBungLog bungLog = userBungLogRepository.findByIdAndUserId(logId, userId)
+                .orElseThrow(() -> new RuntimeException("해당 붕어빵 로그를 찾을 수 없습니다."));
 
-        // 3. UserBungLog 기록 조회
-        UserBungLog bungLog = userBungLogRepository.findById(logUUID)
-                .orElseThrow(() -> new ResourceNotFoundException("붕어빵 기록을 찾을 수 없습니다."));
-        // 소유자 확인
-        if (!bungLog.getUser().getId().equals(user.getId())) {
-            throw new ResourceNotFoundException("붕어빵 기록을 찾을 수 없습니다.");
-        }
+        // User 붕 개수 다시 설정 (recent count는 변경 X)
+        Users user = userRepository.findUsersById(userId);
+        user.setBungCount(user.getBungCount()-bungLog.getCount()+updateDto.getBungCount());
 
-        // 4. 수정 데이터 적용
-        bungLog.setCount((long) updateDto.getBungCount());
+        // 붕어빵 도감에서 붕어빵 이름 찾기
+        BungDogam newBung = bungDogamRepository.findByBungName(updateDto.getBungName())
+                .orElseThrow(() -> new RuntimeException("해당 붕어빵을 찾을 수 없습니다."));
+
+        // 붕어빵 로그 정보 수정
+        bungLog.setBung(newBung);
+        bungLog.setCount(updateDto.getBungCount());
         bungLog.setTags(String.join(",", updateDto.getTags()));
-        bungLog.setLogDate(updateDto.getDate().atStartOfDay());
 
-        // 5. 붕어빵 이름 수정 처리: 만약 bungName이 달라지면, 해당 BungDogam 조회(없으면 생성) 후 연결 업데이트
-        if (!bungLog.getBung().getBungName().equals(updateDto.getBungName())) {
-            BungDogam newBung = bungDogamRepository.findByBungName(updateDto.getBungName())
-                    .orElseGet(() -> {
-                        BungDogam b = new BungDogam();
-                        b.setBungName(updateDto.getBungName());
-                        return bungDogamRepository.save(b);
-                    });
-            bungLog.setBung(newBung);
+        userBungLogRepository.save(bungLog);
+
+
+
+        // 기존 이미지 삭제
+        List<UserBungImage> existingImages = bungLog.getUserBungImages();
+        for (UserBungImage image : existingImages) {
+            fileStorageService.deleteFile(image.getImageUrl());  // 파일 스토리지에서 삭제
+            userBungImageRepository.delete(image);  // DB에서 삭제
         }
 
-        // 6. 기록 저장 (업데이트)
-        bungLog = userBungLogRepository.save(bungLog);
+        // 새로운 이미지 업로드
+        if (images != null && images.size() <= 5) {
+            for (MultipartFile image : images) {
 
-        // 7. 이미지 파일 처리: 새 이미지가 첨부된 경우, 업로드 후 새로운 이미지 엔티티 생성
-        if (image != null && !image.isEmpty()) {
-            String imageUrl = fileStorageService.uploadFile(image);
-            UserBungImage newImage = new UserBungImage();
-            newImage.setUserBungLog(bungLog);
-            newImage.setImageUrl(imageUrl);
-            newImage.setUploadedAt(LocalDateTime.now());
-            userBungImageRepository.save(newImage);
+                String imageUrl = fileStorageService.uploadFile(image);
+                UserBungImage userBungImage = new UserBungImage();
+                userBungImage.setImageUrl(imageUrl);
+                userBungImage.setUserBungLog(bungLog);
+                userBungImage.setUploadedAt(bungLog.getLogDate());
+                userBungImageRepository.save(userBungImage);
+                }
+            }
         }
 
-        // 8. 응답 DTO 구성: 기존 기록에 속한 모든 이미지 URL 추출, 태그 문자열 분리
-        List<String> imageUrls = bungLog.getUserBungImages().stream()
-                .map(img -> img.getImageUrl())
-                .collect(Collectors.toList());
-        List<String> tagList = (bungLog.getTags() != null && !bungLog.getTags().isEmpty())
-                ? List.of(bungLog.getTags().split(","))
-                : null;
 
-        return new UpdateLogResponseDto(
-                bungLog.getId().toString(),
-                bungLog.getBung().getBungName(),
-                bungLog.getCount().intValue(),
-                tagList,
-                imageUrls,
-                bungLog.getLogDate().toLocalDate()
-        );
+
     }
 
-
-
-}

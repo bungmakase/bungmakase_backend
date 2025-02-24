@@ -14,7 +14,7 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedOrigins(
                         "https://bungmakase.vercel.app", // Vercel 배포 URL
                         "http://localhost:3000",     // React 로컬 개발 서버
-                        "https://localhost:30001"
+                        "https://localhost:3001"
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") // 허용할 HTTP 메서드
                 .allowedHeaders("*") // 모든 헤더 허용

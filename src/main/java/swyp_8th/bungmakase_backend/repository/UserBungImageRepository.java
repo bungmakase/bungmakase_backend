@@ -7,4 +7,5 @@ import java.util.UUID;
 
 public interface UserBungImageRepository extends JpaRepository<UserBungImage, UUID> {
 
+    void deleteByImageUrl (String imageUrl);
 }

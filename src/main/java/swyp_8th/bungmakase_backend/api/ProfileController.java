@@ -1,9 +1,12 @@
 package swyp_8th.bungmakase_backend.api;
 
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import swyp_8th.bungmakase_backend.config.JwtConfig;
+import swyp_8th.bungmakase_backend.dto.bung_level.BungLogRequestDto;
 import swyp_8th.bungmakase_backend.dto.profile.*;
 import swyp_8th.bungmakase_backend.exception.ResourceNotFoundException;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
@@ -13,6 +16,7 @@ import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.ProfileService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -21,7 +25,7 @@ import java.util.List;
 public class ProfileController {
 
     private final ProfileService profileService;
-
+    private final JwtConfig jwtConfig;
 
     @GetMapping("/user")
     public ResponseEntity<ResponseTemplate<UserProfileResponseDto>> getUserProfile(
@@ -140,47 +144,27 @@ public class ProfileController {
         }
     }
 
-    @PutMapping(value = "/logs/edit", consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseTemplate<UpdateLogResponseDto>> updateBungLog(
-            @CookieValue(value = "token", required = false) String token,
-            @RequestParam("logId") String logId,
-            @RequestPart("logData") UpdateLogRequestDto updateBungLogDto,
-            @RequestPart(value = "image", required = false) MultipartFile image) {
 
-        if (token == null || token.isEmpty()) {
-            ResponseTemplate<UpdateLogResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
-            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
-        }
+    /*@PutMapping(value = "/logs/edit",  consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseTemplate<Void>> addDailyBungLog(
+            @RequestParam UUID logId,
+            @CookieValue(value = "token") String token,
+            @RequestPart("bungLogData") BungLogRequestDto bungLogData,
+            @RequestPart(value = "image", required = false) List<MultipartFile> images) {
 
         try {
-            UpdateLogResponseDto updatedLog = profileService.updateBungLog(token, logId, updateBungLogDto, image);
-            ResponseTemplate<UpdateLogResponseDto> response =
-                    new ResponseTemplate<>(SuccessCode.SUCCESS_200, updatedLog);
-            response.setMessage("붕어빵 기록 수정 성공");
-            return ResponseEntity.ok(response);
-        } catch (ResourceNotFoundException ex) {
-            ResponseTemplate<UpdateLogResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.NOT_FOUND_404, null);
-            failResponse.setMessage(ex.getMessage());
-            return ResponseEntity.status(FailureCode.NOT_FOUND_404.getCode()).body(failResponse);
-        } catch (UnauthorizedException ex) {
-            ResponseTemplate<UpdateLogResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
-            failResponse.setMessage(ex.getMessage());
-            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
-        } catch (IllegalArgumentException ex) {
-            ResponseTemplate<UpdateLogResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null);
-            failResponse.setMessage(ex.getMessage());
-            return ResponseEntity.status(FailureCode.BAD_REQUEST_400.getCode()).body(failResponse);
-        } catch (Exception ex) {
-            ResponseTemplate<UpdateLogResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null);
-            return ResponseEntity.status(FailureCode.SERVER_ERROR_500.getCode()).body(failResponse);
+            UUID userId = jwtConfig.getUserIdFromToken(token);
+            profileService.updateBungLog(userId, logId, bungLogData, images);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
         }
-    }
 
 
-
+    }*/
 }

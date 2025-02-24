@@ -115,7 +115,7 @@ public class BungDogamController {
         }
     }
 
-    @Operation(
+    /*@Operation(
             summary = "유저 붕어빵 도감 추가용 임시 API",
             description = "특정 유저의 붕어빵 도감에 새로운 붕어빵을 추가 (bungId는 1~11)"
     )
@@ -127,5 +127,5 @@ public class BungDogamController {
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("에러: " + e.getMessage());
         }
-    }
+    }*/
 }
