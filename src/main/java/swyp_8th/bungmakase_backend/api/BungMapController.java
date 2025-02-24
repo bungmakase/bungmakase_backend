@@ -15,7 +15,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @RestController
-@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000"})
+@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
 @RequiredArgsConstructor
 @RequestMapping("/api/map")
 public class BungMapController {

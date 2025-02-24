@@ -21,7 +21,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000"})
+@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
 @RequiredArgsConstructor
 @RequestMapping("/api/dogam")
 public class BungDogamController {

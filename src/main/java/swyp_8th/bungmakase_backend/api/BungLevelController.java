@@ -1,12 +1,10 @@
 package swyp_8th.bungmakase_backend.api;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RequestMapping;
-import swyp_8th.bungmakase_backend.api.dto.RankingResponseDto;
-import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
+import org.springframework.web.bind.annotation.*;
+import swyp_8th.bungmakase_backend.dto.profile.RankingResponseDto;
+import swyp_8th.bungmakase_backend.dto.bung_level.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
@@ -15,15 +13,13 @@ import swyp_8th.bungmakase_backend.service.BungLevelService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/level")
+@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
+@RequiredArgsConstructor
 public class BungLevelController {
 
     private final BungLevelService bungLevelService;
-
-    public BungLevelController( BungLevelService bungLevelService) {
-        this.bungLevelService = bungLevelService;
-    }
 
 
     @GetMapping("/user")

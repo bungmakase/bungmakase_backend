@@ -1,17 +1,14 @@
 package swyp_8th.bungmakase_backend.service;
 
-import io.swagger.v3.oas.annotations.servers.Server;
 import org.springframework.stereotype.Service;
-import swyp_8th.bungmakase_backend.api.dto.RankingResponseDto;
-import swyp_8th.bungmakase_backend.api.dto.UserLevelResponseDto;
+import swyp_8th.bungmakase_backend.dto.profile.RankingResponseDto;
+import swyp_8th.bungmakase_backend.dto.bung_level.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.repository.MyUserRepository;
-import swyp_8th.bungmakase_backend.repository.UserRepository;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 @Service

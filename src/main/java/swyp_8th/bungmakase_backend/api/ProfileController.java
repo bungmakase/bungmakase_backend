@@ -1,10 +1,10 @@
 package swyp_8th.bungmakase_backend.api;
 
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-import swyp_8th.bungmakase_backend.api.dto.*;
+import swyp_8th.bungmakase_backend.dto.profile.*;
 import swyp_8th.bungmakase_backend.exception.ResourceNotFoundException;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
@@ -14,14 +14,14 @@ import swyp_8th.bungmakase_backend.service.ProfileService;
 
 import java.util.List;
 
-@Controller
+@RestController
 @RequestMapping("/api/profile")
+@CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
+@RequiredArgsConstructor
 public class ProfileController {
+
     private final ProfileService profileService;
 
-    public ProfileController(ProfileService profileService) {
-        this.profileService = profileService;
-    }
 
     @GetMapping("/user")
     public ResponseEntity<ResponseTemplate<UserProfileResponseDto>> getUserProfile(
@@ -79,7 +79,7 @@ public class ProfileController {
         }
     }
 
-    @GetMapping("/logs")
+    @GetMapping("/logs/list")
     public ResponseEntity<ResponseTemplate<List<LogListResponseDto>>> getUserBungLogs(
             @CookieValue(value = "token", required = false) String token) {
 
@@ -140,7 +140,7 @@ public class ProfileController {
         }
     }
 
-    @PutMapping(value = "/logs", consumes = {"multipart/form-data"})
+    @PutMapping(value = "/logs/edit", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<UpdateLogResponseDto>> updateBungLog(
             @CookieValue(value = "token", required = false) String token,
             @RequestParam("logId") String logId,
