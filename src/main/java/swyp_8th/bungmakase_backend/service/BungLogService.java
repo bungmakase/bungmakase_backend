@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.domain.*;
 import swyp_8th.bungmakase_backend.dto.bung_level.BungLogRequestDto;
+import swyp_8th.bungmakase_backend.dto.bung_level.SuggestBungRequest;
 import swyp_8th.bungmakase_backend.repository.*;
 
 import java.util.List;
@@ -104,5 +105,29 @@ public class BungLogService {
             log.error("addDailyBungLog 실패", e);
             throw new RuntimeException("일일 붕어빵 로그 추가 중 오류가 발생했습니다.");
         }
+    }
+
+    @Transactional
+    public void suggestBung(SuggestBungRequest request) {
+        // 입력값 검증
+        if (request.getBungName() == null || request.getBungName().isBlank() ||
+                request.getTags() == null || request.getTags().isEmpty()) {
+            log.warn("입력값 검증 실패: {}", request);
+            throw new IllegalArgumentException("붕어빵 이름과 태그는 필수 입력값입니다.");
+        }
+
+        // 중복 체크
+        bungDogamRepository.findByBungName(request.getBungName())
+                .ifPresent(b -> {
+                    throw new IllegalArgumentException("이미 존재하는 붕어빵입니다.");
+                });
+
+        // 붕어빵 생성
+        BungDogam newBung = new BungDogam();
+        newBung.setBungName(request.getBungName());
+
+
+        bungDogamRepository.save(newBung);
+        log.info("붕어빵 등록 성공: {}", newBung.getBungName());
     }
 }

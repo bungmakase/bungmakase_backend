@@ -1,5 +1,6 @@
 package swyp_8th.bungmakase_backend.api;
 
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -7,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.dto.bung_level.BungLogRequestDto;
+import swyp_8th.bungmakase_backend.dto.bung_level.SuggestBungRequest;
 import swyp_8th.bungmakase_backend.dto.profile.RankingResponseDto;
 import swyp_8th.bungmakase_backend.dto.bung_level.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
@@ -98,7 +100,22 @@ public class BungLevelController {
         }
     }
 
+    @PostMapping("/suggest")
+    public ResponseEntity<ResponseTemplate<Void>> suggestBung(
+            @RequestBody @Valid SuggestBungRequest request) {
 
+        try {
+            bungLogService.suggestBung(request);
+            return ResponseEntity.status(HttpStatus.CREATED)
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest()
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
 
 
 
