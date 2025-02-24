@@ -99,7 +99,7 @@ public class AuthController {
 
             String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
 
-            // 2. 응답 헤더에 쿠키 추가
+            // 응답 헤더에 쿠키 추가
             response.setHeader("Set-Cookie", cookieValue);
 
             return ResponseEntity.status(HttpStatus.OK)
@@ -111,7 +111,7 @@ public class AuthController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<ResponseTemplate<Map<String, String>>> logout(@RequestHeader("Authorization") String authorizationHeader){
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> logout(@CookieValue(value = "token") String token){
         try{
             return ResponseEntity.status(HttpStatus.OK)
                     .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));

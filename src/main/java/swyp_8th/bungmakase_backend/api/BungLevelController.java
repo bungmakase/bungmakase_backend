@@ -3,6 +3,7 @@ package swyp_8th.bungmakase_backend.api;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.dto.profile.RankingResponseDto;
 import swyp_8th.bungmakase_backend.dto.bung_level.UserLevelResponseDto;
 import swyp_8th.bungmakase_backend.exception.UnauthorizedException;
@@ -12,6 +13,7 @@ import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.BungLevelService;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/level")
@@ -20,25 +22,18 @@ import java.util.List;
 public class BungLevelController {
 
     private final BungLevelService bungLevelService;
+    private final JwtConfig jwtConfig;
 
 
     @GetMapping("/user")
     public ResponseEntity<ResponseTemplate<UserLevelResponseDto>> getUser(
-            @RequestHeader("Authorization") String authorizationHeader
-    ) {
+            @CookieValue(value = "token") String token) {
 
-        //Format of Authorization header : Bearer JWT_ACCESS_TOKEN
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            ResponseTemplate<UserLevelResponseDto> failResponse =
-                    new ResponseTemplate<>(FailureCode.UNAUTHORIZED_401, null);
-            return ResponseEntity.status(FailureCode.UNAUTHORIZED_401.getCode()).body(failResponse);
-        }
-
-        //extract Jwt_Access_Token form "Bearer JWT_ACCESS_TOKEN"
-        String token = extractToken(authorizationHeader);
+        // 토큰에서 유저 ID 추출
+        UUID userId = jwtConfig.getUserIdFromToken(token);
 
         try {
-            UserLevelResponseDto userLevelResponseDto = bungLevelService.getUserLevel(token);
+            UserLevelResponseDto userLevelResponseDto = bungLevelService.getUserLevel(userId);
             ResponseTemplate<UserLevelResponseDto> response = new ResponseTemplate<>(SuccessCode.SUCCESS_200, userLevelResponseDto);
             return ResponseEntity.ok(response);
         } catch (UnauthorizedException ex) {
@@ -51,9 +46,9 @@ public class BungLevelController {
     }
 
     @GetMapping("/rankings")
-    public ResponseEntity<ResponseTemplate<List<RankingResponseDto>>> getRankings() {
+    public ResponseEntity<ResponseTemplate<List<RankingResponseDto>>> get20Rankings() {
         try {
-            List<RankingResponseDto> rankings = bungLevelService.getRankings();
+            List<RankingResponseDto> rankings = bungLevelService.get20Rankings();
             ResponseTemplate<List<RankingResponseDto>> response =
                     new ResponseTemplate<>(SuccessCode.SUCCESS_200, rankings);
             return ResponseEntity.ok(response);
@@ -67,10 +62,4 @@ public class BungLevelController {
 
 
 
-    private String extractToken(String header) {
-        if(header != null && header.startsWith("Bearer ")) { //delete this method if the logic duplicated
-            return header.substring(7);
-        }
-        throw new IllegalArgumentException("Invalid Authorization header");
-    }
 }
