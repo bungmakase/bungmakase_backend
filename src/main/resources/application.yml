@@ -41,8 +41,6 @@ logging:
   level:
     org.hibernate.SQL: debug    # Hibernate SQL 디버깅
 
-server:
-  port: 8080
 
 kakao:
   client-id: "0ed5f2288c7f985d06f7ca5610740c23"
@@ -61,14 +59,14 @@ ncp:
 
 
 
-#server:
-#  port: 443
-#  ssl:
-#    key-store: classpath:keystore.p12
-#    key-store-password:
-#    key-store-type: PKCS12
-#    enabled: true
-#  tomcat:
-#    threads:
-#      max: 200                  # 최대 스레드 수
-#      min-spare: 20             # 최소 대기 스레드 수
+server:
+  port: 443
+  ssl:
+    key-store: classpath:keystore.p12
+    key-store-password: bungmakase
+    key-store-type: PKCS12
+    enabled: true
+  tomcat:
+    threads:
+      max: 200                  # 최대 스레드 수
+      min-spare: 20             # 최소 대기 스레드 수
