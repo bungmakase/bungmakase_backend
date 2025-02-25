@@ -22,7 +22,7 @@ public class CustomClientRegistrationConfig {
                 .clientSecret("YOUR_CLIENT_SECRET") // 필요시 입력
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-                .redirectUri("https://www.bungmakase.shop/api/auth/kakao/callback")
+                .redirectUri("https://bungmakase.shop/api/auth/kakao/callback")
                 .scope("profile", "account_email")
                 .authorizationUri("https://kauth.kakao.com/oauth/authorize")
                 .tokenUri("https://kauth.kakao.com/oauth/token")
