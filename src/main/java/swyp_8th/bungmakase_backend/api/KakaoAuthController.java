@@ -11,6 +11,8 @@ import swyp_8th.bungmakase_backend.globals.CookieUtil;
 import swyp_8th.bungmakase_backend.service.KakaoAuthService;
 
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @RestController
@@ -50,31 +52,24 @@ public class KakaoAuthController {
     }
 
     @GetMapping("/kakao/callback")
-    public void kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state,
-    HttpServletResponse response) throws IOException{
-        // 1. 카카오 인가코드로 엑세스 토큰 발급
+    public ResponseEntity<Void> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
+        // 카카오 인가코드로 엑세스 토큰 발급
         String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
 
-        // 2. 엑세스 토큰으로 유저 정보 조회 및 저장
+        // 엑세스 토큰으로 유저 정보 조회 및 저장
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-    
-        String frontendUrl;
-        String cookieDomain;
 
-        if ("local".equals(state)) {
-            frontendUrl = "https://localhost:3001";
-            cookieDomain = "localhost"; // 로컬용 도메인
-        } else {
-            frontendUrl = "https://bungmakase.vercel.app";
-            cookieDomain = ".vercel.app"; // 운영 도메인
-        }
+        String cookieDomain = "local".equals(state) ? "localhost" : ".vercel.app";
 
-        response.setHeader("Set-Cookie", cookieUtill.createCookie(jwtToken, cookieDomain).toString());
-        response.sendRedirect(frontendUrl);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwtToken, cookieDomain).toString());
+
+        return ResponseEntity.ok()
+                .headers(headers)
+                .build();
+
     }
-
-
-
 }
