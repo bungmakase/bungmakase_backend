@@ -3,6 +3,7 @@ package swyp_8th.bungmakase_backend.api;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -35,24 +36,26 @@ public class KakaoAuthController {
     private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
 
     @GetMapping("/kakao")
-    public ResponseEntity<ResponseTemplate<Map<String, String>>> getKakaoLoginUrl() {
-        try {
-            String loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code",
+    public void getKakaoLoginUrl(@RequestParam String state, HttpServletResponse response) throws Exception{
+
+        String loginUrl;
+
+        if ("local".equals(state)) {
+            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&state=local",
                     KAKAO_AUTH_URL, clientId, redirectUri);
-
-            Map<String, String> responseData = new HashMap<>();
-            responseData.put("loginUrl", loginUrl);
-
-            return ResponseEntity.ok(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
         }
+
+        else {
+            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code",
+                    KAKAO_AUTH_URL, clientId, redirectUri);
+        }
+
+        response.sendRedirect(loginUrl);
+
     }
 
     @GetMapping("/kakao/callback")
-    public void kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state,
-                            HttpServletResponse response) throws IOException{
+    public ResponseEntity<Void> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
         // 1. 카카오 인가코드로 엑세스 토큰 발급
         String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
 
@@ -61,20 +64,24 @@ public class KakaoAuthController {
         String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
     
-        String frontendUrl;
+        // String frontendUrl;
         String cookieDomain;
 
         if ("local".equals(state)) {
-            frontendUrl = "https://localhost:3001";
+            // frontendUrl = "https://localhost:3001";
             cookieDomain = "localhost"; // 로컬용 도메인
         } else {
-            frontendUrl = "https://bungmakase.vercel.app";
+            // frontendUrl = "https://bungmakase.vercel.app";
             cookieDomain = ".vercel.app"; // 운영 도메인
         }
 
+        HttpHeaders headers = new HttpHeaders();
+        headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwtToken, cookieDomain).toString());
 
-        response.setHeader("Set-Cookie", cookieUtill.createCookie(jwtToken, cookieDomain).toString());
 
+        return ResponseEntity.ok()
+                .headers(headers)
+                .build();
 
         // response.sendRedirect(frontendUrl);
     }
