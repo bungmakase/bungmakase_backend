@@ -44,7 +44,7 @@ logging:
 
 kakao:
   client-id: "0ed5f2288c7f985d06f7ca5610740c23"
-  redirect-uri: "http://211.188.61.117:8080/api/auth/kakao/callback"
+  redirect-uri: "https://www.bungmakase.shop/api/auth/kakao/callback"
 
 jwt:
   secret-key: "+M/FwZHNfp1U576hW3XaPByErG3p83NqEXRRhG3EYwXrvkrPxb5TAvjqKZQI/QCbaWrU3gW+b1BaT35zpxyz3Q=="
