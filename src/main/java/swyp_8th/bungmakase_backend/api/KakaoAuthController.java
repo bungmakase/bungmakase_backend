@@ -64,7 +64,7 @@ public class KakaoAuthController {
     
         String frontendUrl;
         if ("local".equals(state)) {
-            frontendUrl = "http://localhost:3000";
+            frontendUrl = "https://localhost:3001";
         } else {
             frontendUrl = "https://bungmakase.vercel.app";
         }
