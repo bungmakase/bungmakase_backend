@@ -63,14 +63,20 @@ public class KakaoAuthController {
 
     
         String frontendUrl;
+        String cookieDomain;
+
         if ("local".equals(state)) {
             frontendUrl = "https://localhost:3001";
+            cookieDomain = "localhost"; // 로컬용 도메인
         } else {
             frontendUrl = "https://bungmakase.vercel.app";
+            cookieDomain = ".vercel.app"; // 운영 도메인
         }
 
         // 4. 응답 헤더에 쿠키 추가
-        String cookieValue = "token=" + jwtToken + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+        String cookieValue = "token=" + jwtToken + "; Path=/; Domain=" + cookieDomain +
+                "; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+
         response.setHeader("Set-Cookie", cookieValue);
 
 
