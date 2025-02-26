@@ -35,6 +35,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용
                         .requestMatchers("/api/**").permitAll()
+                        .requestMatchers("/oauth2/authorization/kakao").permitAll()
                         // Swagger 허용 URL
                         .requestMatchers(
                                 "/swagger-ui/**",
@@ -60,7 +61,7 @@ public class SecurityConfig {
     public OAuth2AuthorizationRequestResolver customAuthorizationRequestResolver(ClientRegistrationRepository clientRegistrationRepository) {
         return new OAuth2AuthorizationRequestResolver() {
             private final DefaultOAuth2AuthorizationRequestResolver defaultResolver =
-                    new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorize");
+                    new DefaultOAuth2AuthorizationRequestResolver(clientRegistrationRepository, "/oauth2/authorization");
 
             @Override
             public OAuth2AuthorizationRequest resolve(HttpServletRequest request) {
