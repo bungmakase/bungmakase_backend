@@ -32,7 +32,7 @@ public class KakaoAuthService {
     private static final String KAKAO_TOKEN_URL = "https://kauth.kakao.com/oauth/token";
     private static final String KAKAO_USERINFO_URL = "https://kapi.kakao.com/v2/user/me";
 
-    @Value("${kakao.redirect-uri}")
+//    @Value("${kakao.redirect-uri}")
     private String REDIRECT_URI;
 
     @Value("${kakao.client-id}")
@@ -41,7 +41,7 @@ public class KakaoAuthService {
     /**
      * 카카오 인가 코드로 액세스 토큰 요청
      */
-    public OAuthToken getOAuthToken(String code){
+    public OAuthToken getOAuthToken(String code, String state){
 
         RestTemplate rt = new RestTemplate();
         Gson gson = new Gson();
@@ -54,6 +54,13 @@ public class KakaoAuthService {
         MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
         params.add("grant_type", "authorization_code");
         params.add("client_id", CLIENT_ID);
+
+        if (state.equals("local")){
+            REDIRECT_URI = "https://localhost:3001/api/auth/kakao";
+        }
+        else{
+            REDIRECT_URI = "https://bungmakase.vercel.app/api/auth/kakao";
+        }
         params.add("redirect_uri", REDIRECT_URI);
         params.add("code", code);
 

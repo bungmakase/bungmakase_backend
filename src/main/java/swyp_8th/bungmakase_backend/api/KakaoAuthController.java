@@ -27,34 +27,34 @@ public class KakaoAuthController {
     @Value("${kakao.client-id}")
     private String clientId;
 
-    @Value("${kakao.redirect-uri}")
-    private String redirectUri;
+//    @Value("${kakao.redirect-uri}")
+//    private String redirectUri;
 
     private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
 
-    @GetMapping("/kakao")
-    public void getKakaoLoginUrl(@RequestParam(required =false) String state, HttpServletResponse response) throws Exception{
-
-        String loginUrl;
-
-        if ("local".equals(state)) {
-            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&state=local",
-                    KAKAO_AUTH_URL, clientId, redirectUri);
-        }
-
-        else {
-            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code",
-                    KAKAO_AUTH_URL, clientId, redirectUri);
-        }
-
-        response.sendRedirect(loginUrl);
-
-    }
+//    @GetMapping("/kakao")
+//    public void getKakaoLoginUrl(@RequestParam(required =false) String state, HttpServletResponse response) throws Exception{
+//
+//        String loginUrl;
+//
+//        if ("local".equals(state)) {
+//            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code&state=local",
+//                    KAKAO_AUTH_URL, clientId, redirectUri);
+//        }
+//
+//        else {
+//            loginUrl = String.format("%s?client_id=%s&redirect_uri=%s&response_type=code",
+//                    KAKAO_AUTH_URL, clientId, redirectUri);
+//        }
+//
+//        response.sendRedirect(loginUrl);
+//
+//    }
 
     @GetMapping("/kakao/callback")
     public ResponseEntity<Void> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
         // 카카오 인가코드로 엑세스 토큰 발급
-        String accessToken = kakaoAuthService.getOAuthToken(code).getAccessToken();
+        String accessToken = kakaoAuthService.getOAuthToken(code, state).getAccessToken();
 
         // 엑세스 토큰으로 유저 정보 조회 및 저장
         KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
