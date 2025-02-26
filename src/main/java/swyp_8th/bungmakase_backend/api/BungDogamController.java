@@ -53,7 +53,7 @@ public class BungDogamController {
 
     @GetMapping("/userList")
     public ResponseEntity<ResponseTemplate<List<BungListResponseDto>>> getUserBungDogam(
-            @CookieValue(value = "token") String token) {
+            @RequestHeader(value = "Authorization") String token) {
 
         try {
             // 토큰에서 유저 ID 추출
@@ -85,7 +85,7 @@ public class BungDogamController {
 
     @GetMapping
     public ResponseEntity<ResponseTemplate<BungResponseDto>> getBungDogam(
-            @CookieValue(value = "token") String token,
+            @RequestHeader(value = "Authorization") String token,
             @RequestParam("bungId") int bungId) {
 
         try {

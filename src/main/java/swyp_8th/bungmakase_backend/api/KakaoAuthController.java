@@ -58,25 +58,18 @@ public class KakaoAuthController {
     @GetMapping("/kakao/callback")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
 
-        try{
-            // 카카오 인가코드로 엑세스 토큰 발급
-            String accessToken = kakaoAuthService.getOAuthToken(code, state).getAccessToken();
+        String accessToken = kakaoAuthService.getOAuthToken(code, state).getAccessToken();
 
-            // 엑세스 토큰으로 유저 정보 조회 및 저장
-            KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
-            String jwtToken = kakaoAuthService.processUserLogin(userInfo);
+        // 엑세스 토큰으로 유저 정보 조회 및 저장
+        KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
+        String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
-
-            Map<String, String> responseData = new HashMap<>();
-            responseData.put("token", jwtToken);
-
-            return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
-        } catch (Exception e){
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
-        }
+        Map<String, String> responseData = new HashMap<>();
+        responseData.put("token", jwtToken);
 
 
+        // 3. 응답 반환
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(new ResponseTemplate<>(SuccessCode.CREATED_201, responseData));
     }
 }
