@@ -53,8 +53,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())                    // CSRF 비활성화
                 .formLogin(form -> form.disable())               // Form 로그인 비활성화
                 .httpBasic(httpBasic -> httpBasic.disable())   // HTTP Basic 비활성화
-                .oauth2Login(oauth2 -> oauth2.disable())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .oauth2Login(oauth2 -> oauth2.disable());
 
 
 //                .oauth2Login(oauth2 -> oauth2
