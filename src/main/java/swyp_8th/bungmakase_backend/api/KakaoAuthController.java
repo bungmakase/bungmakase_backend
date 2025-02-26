@@ -4,10 +4,14 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swyp_8th.bungmakase_backend.dto.kakao_auth.KakaoUserInfoDto;
 import swyp_8th.bungmakase_backend.globals.CookieUtil;
+import swyp_8th.bungmakase_backend.globals.code.FailureCode;
+import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
+import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.KakaoAuthService;
 
 import java.io.IOException;
@@ -52,24 +56,27 @@ public class KakaoAuthController {
 //    }
 
     @GetMapping("/kakao/callback")
-    public ResponseEntity<Void> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
-        // 카카오 인가코드로 엑세스 토큰 발급
-        String accessToken = kakaoAuthService.getOAuthToken(code, state).getAccessToken();
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
 
-        // 엑세스 토큰으로 유저 정보 조회 및 저장
-        KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
-        String jwtToken = kakaoAuthService.processUserLogin(userInfo);
+        try{
+            // 카카오 인가코드로 엑세스 토큰 발급
+            String accessToken = kakaoAuthService.getOAuthToken(code, state).getAccessToken();
+
+            // 엑세스 토큰으로 유저 정보 조회 및 저장
+            KakaoUserInfoDto userInfo = kakaoAuthService.getUserInfo(accessToken);
+            String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
 
-        String cookieDomain = "local".equals(state) ? "localhost" : ".vercel.app";
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwtToken);
 
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
+        } catch (Exception e){
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwtToken, cookieDomain).toString());
-
-        return ResponseEntity.ok()
-                .headers(headers)
-                .build();
 
     }
 }

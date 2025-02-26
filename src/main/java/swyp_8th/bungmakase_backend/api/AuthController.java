@@ -57,15 +57,13 @@ public class AuthController {
             // 1. 회원가입 처리 및 JWT 생성
             String jwt = authService.signup(requestDto, image);
 
-            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
-
-            // 2. 응답 헤더에 쿠키 추가
-            response.setHeader("Set-Cookie", cookieValue);
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwt);
 
 
             // 3. 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, responseData));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -97,13 +95,13 @@ public class AuthController {
         try {
             String jwt = authService.loginWithEmail(request);
 
-            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
 
-            // 응답 헤더에 쿠키 추가
-            response.setHeader("Set-Cookie", cookieValue);
+            // 응답 데이터에 토큰 포함
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwt);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
