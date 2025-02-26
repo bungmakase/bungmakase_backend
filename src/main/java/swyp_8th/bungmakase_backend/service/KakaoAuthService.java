@@ -55,7 +55,7 @@ public class KakaoAuthService {
         params.add("grant_type", "authorization_code");
         params.add("client_id", CLIENT_ID);
 
-        if (state.equals("local")){
+        if ("local".equals(state)){
             REDIRECT_URI = "https://localhost:3001/api/auth/kakao";
         }
         else{
