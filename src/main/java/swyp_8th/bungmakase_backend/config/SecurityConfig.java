@@ -36,7 +36,6 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용
                         .requestMatchers("/api/**").permitAll()
@@ -52,8 +51,7 @@ public class SecurityConfig {
                 )
                 .csrf(csrf -> csrf.disable())                    // CSRF 비활성화
                 .formLogin(form -> form.disable())               // Form 로그인 비활성화
-                .httpBasic(httpBasic -> httpBasic.disable())   // HTTP Basic 비활성화
-                .oauth2Login(oauth2 -> oauth2.disable());
+                .httpBasic(httpBasic -> httpBasic.disable());  // HTTP Basic 비활성화
 
 
 //                .oauth2Login(oauth2 -> oauth2
