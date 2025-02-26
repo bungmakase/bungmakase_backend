@@ -2,6 +2,7 @@ package swyp_8th.bungmakase_backend.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,6 +25,7 @@ import java.util.stream.Collectors;
 @CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
 @RequiredArgsConstructor
 @RequestMapping("/api/dogam")
+@Slf4j
 public class BungDogamController {
 
     private final BungDogamService bungDogamService;
@@ -56,8 +58,11 @@ public class BungDogamController {
             @RequestHeader(value = "Authorization") String token) {
 
         try {
+            log.info("검증 시작");
+            log.info("token: {}", token);
             // 토큰에서 유저 ID 추출
             UUID userId = jwtConfig.getUserIdFromToken(token);
+            log.info("userId: {}", userId);
 
             // 유저가 발견한 붕어빵 리스트 조회
             List<UserBungDogam> userBungList = bungDogamService.getUserFoundBung(userId);
