@@ -29,9 +29,9 @@ public class KakaoAuthController {
 
 //    @Value("${kakao.redirect-uri}")
 //    private String redirectUri;
-
-    private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
-
+//
+//    private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
+//
 //    @GetMapping("/kakao")
 //    public void getKakaoLoginUrl(@RequestParam(required =false) String state, HttpServletResponse response) throws Exception{
 //
