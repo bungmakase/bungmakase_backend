@@ -1,6 +1,7 @@
 package swyp_8th.bungmakase_backend.api;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -8,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.dto.auth.EmailLoginRequestDto;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
+import swyp_8th.bungmakase_backend.globals.CookieUtil;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
+    private final CookieUtil cookieUtill;
 
     @GetMapping("/check-email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> checkEmail(@RequestParam String email) {
@@ -97,12 +100,11 @@ public class AuthController {
         try {
             String jwt = authService.loginWithEmail(request);
 
-            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
-
-            // 응답 헤더에 쿠키 추가
-            response.setHeader("Set-Cookie", cookieValue);
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwt, ".vercel.app").toString());
 
             return ResponseEntity.status(HttpStatus.OK)
+                    .headers(headers)
                     .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
