@@ -57,18 +57,16 @@ public class AuthController {
             @RequestPart(value = "image", required = false) MultipartFile image, HttpServletResponse response) {
 
         try {
-            // 1. 회원가입 처리 및 JWT 생성
+            // 회원가입 처리 및 JWT 생성
             String jwt = authService.signup(requestDto, image);
 
-            String cookieValue = "token=" + jwt + "; Path=/; Max-Age=" + (60 * 60 * 24 * 30) + "; HttpOnly; Secure; SameSite=None";
+            HttpHeaders headers = new HttpHeaders();
+            headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwt, ".vercel.app").toString());
 
-            // 2. 응답 헤더에 쿠키 추가
-            response.setHeader("Set-Cookie", cookieValue);
-
-
-            // 3. 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED)
+                    .headers(headers)
                     .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -95,7 +93,7 @@ public class AuthController {
 
     @PostMapping(value = "/login/email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> loginWithEmail(
-            @RequestBody EmailLoginRequestDto request,HttpServletResponse response) {
+            @RequestBody EmailLoginRequestDto request) {
 
         try {
             String jwt = authService.loginWithEmail(request);

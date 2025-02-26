@@ -4,7 +4,9 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistration;
@@ -20,6 +22,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Configuration
+@EnableWebSecurity
 public class SecurityConfig {
 
 //    @Autowired
@@ -32,6 +35,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(auth -> auth
                         // 인증 없이 허용
                         .requestMatchers("/api/**").permitAll()
@@ -49,6 +53,7 @@ public class SecurityConfig {
                 .formLogin(form -> form.disable())               // Form 로그인 비활성화
                 .httpBasic(httpBasic -> httpBasic.disable())   // HTTP Basic 비활성화
                 .oauth2Login(oauth2 -> oauth2.disable());
+
 //                .oauth2Login(oauth2 -> oauth2
 //                        .authorizationEndpoint(endpoint -> endpoint
 //                                .authorizationRequestResolver(customAuthorizationRequestResolver(clientRegistrationRepository))
