@@ -80,7 +80,7 @@ public class BungMapController {
 
     @PostMapping(value = "/reviews",  consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<Void>> addShopReview(
-            @CookieValue("token") String token,
+            @RequestHeader(value = "Authorization") String token,
             @RequestPart("reviewData") ShopReviewRequest reviewData,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
 

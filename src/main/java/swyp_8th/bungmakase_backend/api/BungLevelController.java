@@ -34,7 +34,7 @@ public class BungLevelController {
 
     @GetMapping("/user")
     public ResponseEntity<ResponseTemplate<UserLevelResponseDto>> getUser(
-            @CookieValue(value = "token") String token) {
+            @RequestHeader(value = "Authorization") String token) {
 
         // 토큰에서 유저 ID 추출
         UUID userId = jwtConfig.getUserIdFromToken(token);
@@ -82,7 +82,7 @@ public class BungLevelController {
 
     @PostMapping(value = "/daily",  consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<Void>> addDailyBungLog(
-            @CookieValue(value = "token") String token,
+            @RequestHeader(value = "Authorization") String token,
             @RequestPart("bungLogData") BungLogRequestDto bungLogData,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
 

@@ -29,7 +29,7 @@ public class ProfileController {
 
     @GetMapping("/user")
     public ResponseEntity<ResponseTemplate<UserProfileResponseDto>> getUserProfile(
-            @CookieValue(value="token", required = false) String token
+            @RequestHeader(value = "Authorization") String token
     ) {
         if(token == null || token.isEmpty()) {
             ResponseTemplate<UserProfileResponseDto> failResponse =
@@ -56,7 +56,7 @@ public class ProfileController {
 
     @PutMapping(value = "/nickname", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<UpdateNicknameResponseDto>> updateNickname(
-            @CookieValue(value = "token", required = false) String token,
+            @RequestHeader(value = "Authorization") String token,
             @RequestPart("userData") UpdateNicknameRequestDto updateProfileDto,
             @RequestPart(value = "image", required = false) MultipartFile image) {
 
@@ -85,7 +85,7 @@ public class ProfileController {
 
     @GetMapping("/logs/list")
     public ResponseEntity<ResponseTemplate<List<LogListResponseDto>>> getUserBungLogs(
-            @CookieValue(value = "token", required = false) String token) {
+            @RequestHeader(value = "Authorization") String token) {
 
         if (token == null || token.isEmpty()) {
             ResponseTemplate<List<LogListResponseDto>> failResponse =
@@ -112,7 +112,7 @@ public class ProfileController {
 
     @GetMapping("/logs")
     public ResponseEntity<ResponseTemplate<LogResponseDto>> getBungLogDetail(
-            @CookieValue(value = "token", required = false) String token,
+            @RequestHeader(value = "Authorization") String token,
             @RequestParam("logId") String logId) {
 
         if (token == null || token.isEmpty()) {
