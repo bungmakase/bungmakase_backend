@@ -2,7 +2,6 @@ package swyp_8th.bungmakase_backend.api;
 
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -10,6 +9,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import swyp_8th.bungmakase_backend.dto.kakao_auth.KakaoUserInfoDto;
 import swyp_8th.bungmakase_backend.globals.CookieUtil;
+import swyp_8th.bungmakase_backend.globals.code.FailureCode;
+import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
+import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.KakaoAuthService;
 
 import java.io.IOException;
@@ -17,12 +19,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 
-
 @RestController
 @CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
 @RequiredArgsConstructor
 @RequestMapping("/api/auth")
-@Slf4j
 public class KakaoAuthController {
 
     private final KakaoAuthService kakaoAuthService;
@@ -33,9 +33,9 @@ public class KakaoAuthController {
 
 //    @Value("${kakao.redirect-uri}")
 //    private String redirectUri;
-//
-//    private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
-//
+
+    private static final String KAKAO_AUTH_URL = "https://kauth.kakao.com/oauth/authorize";
+
 //    @GetMapping("/kakao")
 //    public void getKakaoLoginUrl(@RequestParam(required =false) String state, HttpServletResponse response) throws Exception{
 //
@@ -56,8 +56,7 @@ public class KakaoAuthController {
 //    }
 
     @GetMapping("/kakao/callback")
-    public ResponseEntity<Void> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
-        log.info("카카오 로그인 요청: code={}, state={}", code, state);
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> kakaoLogin(@RequestParam String code, @RequestParam(required = false) String state) throws IOException{
 
         try{
             // 카카오 인가코드로 엑세스 토큰 발급
@@ -68,23 +67,15 @@ public class KakaoAuthController {
             String jwtToken = kakaoAuthService.processUserLogin(userInfo);
 
 
-            String cookieDomain = "local".equals(state) ? "localhost" : ".vercel.app";
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwtToken);
 
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwtToken, cookieDomain).toString());
-
-            log.info("Set-Cookie 헤더 설정 완료: {}", cookieUtill.createCookie(jwtToken, cookieDomain).toString());
-
-            return ResponseEntity.ok()
-                    .headers(headers)
-                    .build();
-
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
         } catch (Exception e){
-            log.error("카카오 로그인 처리 중 오류 발생", e); //
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
         }
-
 
 
     }

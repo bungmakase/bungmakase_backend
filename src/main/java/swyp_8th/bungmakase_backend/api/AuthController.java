@@ -1,7 +1,6 @@
 package swyp_8th.bungmakase_backend.api;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -9,7 +8,6 @@ import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.domain.Users;
 import swyp_8th.bungmakase_backend.dto.auth.EmailLoginRequestDto;
 import swyp_8th.bungmakase_backend.dto.auth.SignupRequestDto;
-import swyp_8th.bungmakase_backend.globals.CookieUtil;
 import swyp_8th.bungmakase_backend.globals.code.FailureCode;
 import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
@@ -25,7 +23,6 @@ import java.util.Map;
 public class AuthController {
 
     private final AuthService authService;
-    private final CookieUtil cookieUtill;
 
     @GetMapping("/check-email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> checkEmail(@RequestParam String email) {
@@ -57,16 +54,16 @@ public class AuthController {
             @RequestPart(value = "image", required = false) MultipartFile image, HttpServletResponse response) {
 
         try {
-            // 회원가입 처리 및 JWT 생성
+            // 1. 회원가입 처리 및 JWT 생성
             String jwt = authService.signup(requestDto, image);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwt, ".vercel.app").toString());
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwt);
 
+
+            // 3. 응답 반환
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .headers(headers)
-                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
-
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, responseData));
 
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
@@ -93,17 +90,18 @@ public class AuthController {
 
     @PostMapping(value = "/login/email")
     public ResponseEntity<ResponseTemplate<Map<String, String>>> loginWithEmail(
-            @RequestBody EmailLoginRequestDto request) {
+            @RequestBody EmailLoginRequestDto request,HttpServletResponse response) {
 
         try {
             String jwt = authService.loginWithEmail(request);
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add(HttpHeaders.SET_COOKIE, cookieUtill.createCookie(jwt, ".vercel.app").toString());
+
+            // 응답 데이터에 토큰 포함
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("token", jwt);
 
             return ResponseEntity.status(HttpStatus.OK)
-                    .headers(headers)
-                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, null));
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
         } catch (Exception e){
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
