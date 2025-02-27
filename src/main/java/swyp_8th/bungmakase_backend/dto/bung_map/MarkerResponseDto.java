@@ -22,4 +22,5 @@ public class MarkerResponseDto {
     private String startTime;
     private String endTime;
     private List<String> tastes;
+    private String imageUrl;
 }

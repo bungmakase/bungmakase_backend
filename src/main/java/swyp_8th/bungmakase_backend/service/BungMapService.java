@@ -50,7 +50,12 @@ public class BungMapService {
                         shop.getStar(),
                         shop.getStartTime() != null ? shop.getStartTime().toString() : "09:00",
                         shop.getEndTime() != null ? shop.getEndTime().toString() : "18:00",
-                        Arrays.asList(shop.getTastes().split(","))
+                        Arrays.asList(shop.getTastes().split(",")),
+                        shop.getBungShopImages().stream()
+                                .filter(image -> image.getBungShopReview() == null)  // bung_shop_review_id가 null인 이미지만 필터링
+                                .map(BungShopImage::getImageUrl)  // 이미지 URL만 추출
+                                .findFirst()  // 첫 번째 이미지만 사용
+                                .orElse(null)  // 없으면 null
                 ))
                 .collect(Collectors.toList());
     }
@@ -70,7 +75,12 @@ public class BungMapService {
                         shop.getStar() != null ? shop.getStar() : 5,
                         shop.getStartTime() != null ? shop.getStartTime().toString() : "09:00",
                         shop.getEndTime() != null ? shop.getEndTime().toString() : "18:00",
-                        Arrays.asList(shop.getTastes().split(","))
+                        Arrays.asList(shop.getTastes().split(",")),
+                        shop.getBungShopImages().stream()
+                                .filter(image -> image.getBungShopReview() == null)  // bung_shop_review_id가 null인 이미지만 필터링
+                                .map(BungShopImage::getImageUrl)  // 이미지 URL만 추출
+                                .findFirst()  // 첫 번째 이미지만 사용
+                                .orElse(null)  // 없으면 null
                 ))
                 .collect(Collectors.toList());
     }
@@ -87,7 +97,12 @@ public class BungMapService {
                         shop.getStar() != null ? shop.getStar() : 5,
                         shop.getStartTime() != null ? shop.getStartTime().toString() : "09:00",
                         shop.getEndTime() != null ? shop.getEndTime().toString() : "18:00",
-                        Arrays.asList(shop.getTastes().split(","))
+                        Arrays.asList(shop.getTastes().split(",")),
+                        shop.getBungShopImages().stream()
+                                .filter(image -> image.getBungShopReview() == null)  // bung_shop_review_id가 null인 이미지만 필터링
+                                .map(BungShopImage::getImageUrl)  // 이미지 URL만 추출
+                                .findFirst()  // 첫 번째 이미지만 사용
+                                .orElse(null)  // 없으면 null
                 ));
     }
 
