@@ -60,13 +60,13 @@ ncp:
 
 
 server:
-  port: 443
-  ssl:
-    key-store: classpath:keystore.p12
-    key-store-password: bungmakase
-    key-store-type: PKCS12
-    enabled: true
-  tomcat:
-    threads:
-      max: 200                  # 최대 스레드 수
-      min-spare: 20             # 최소 대기 스레드 수
+  port: 8080
+#  ssl:
+#    key-store: classpath:keystore.p12
+#    key-store-password: bungmakase
+#    key-store-type: PKCS12
+#    enabled: true
+#  tomcat:
+#    threads:
+#      max: 200                  # 최대 스레드 수
+#      min-spare: 20             # 최소 대기 스레드 수

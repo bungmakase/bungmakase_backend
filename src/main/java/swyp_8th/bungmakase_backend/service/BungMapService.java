@@ -261,7 +261,8 @@ public class BungMapService {
                                 .map(BungShopImage::getImageUrl)
                                 .collect(Collectors.toList()),
                         review.getReviewText(),
-                        review.getCreatedAt()
+                        review.getCreatedAt(),
+                        review.getStar()
                 ))
                 .collect(Collectors.toList());
     }
