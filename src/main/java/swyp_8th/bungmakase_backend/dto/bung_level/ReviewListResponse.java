@@ -22,4 +22,5 @@ public class ReviewListResponse {
     private List<String> bungImages;
     private String reviewText;
     private LocalDateTime reviewTimestamp;
+    private Integer star;
 }

@@ -13,10 +13,7 @@ import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.service.BungMapService;
 
-import java.util.List;
-import java.util.NoSuchElementException;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 
 @RestController
 @CrossOrigin(origins = {"https://bungmakase.vercel.app", "http://localhost:3000", "https://localhost:3001"})
@@ -79,7 +76,7 @@ public class BungMapController {
     }
 
     @PostMapping(value = "/reviews",  consumes = {"multipart/form-data"})
-    public ResponseEntity<ResponseTemplate<Void>> addShopReview(
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> addShopReview(
             @RequestHeader(value = "Authorization") String token,
             @RequestPart("reviewData") ShopReviewRequest reviewData,
             @RequestPart(value = "image", required = false) List<MultipartFile> images) {
@@ -89,8 +86,11 @@ public class BungMapController {
 
             mapService.addShopReview(userId, reviewData, images);
 
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("shopId", reviewData.getShopId());
+
             return ResponseEntity.status(HttpStatus.CREATED)
-                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, null));
+                    .body(new ResponseTemplate<>(SuccessCode.CREATED_201, responseData));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
