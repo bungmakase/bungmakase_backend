@@ -51,7 +51,7 @@ public class AuthController {
     @PostMapping(value = "/signup/email", consumes = {"multipart/form-data"})
     public ResponseEntity<ResponseTemplate<Map<String, String>>> signup(
             @RequestPart("userData") SignupRequestDto requestDto,
-            @RequestPart(value = "image", required = false) MultipartFile image, HttpServletResponse response) {
+            @RequestPart(value = "image", required = false) MultipartFile image) {
 
         try {
             // 1. 회원가입 처리 및 JWT 생성
