@@ -40,6 +40,7 @@ public class BungLogService {
 
             user.setBungCount(user.getBungCount() + bungLogData.getBungCount());
             user.setRecentCount(user.getRecentCount() + bungLogData.getBungCount());
+            user.setLevel((calculateUserLevel(user.getBungCount())));
 
             // 2. 붕 도감에서 붕어빵 찾기
             BungDogam bung = bungDogamRepository.findByBungName(bungLogData.getBungName())
@@ -105,6 +106,19 @@ public class BungLogService {
             log.error("addDailyBungLog 실패", e);
             throw new RuntimeException("일일 붕어빵 로그 추가 중 오류가 발생했습니다.");
         }
+    }
+
+    public long calculateUserLevel(long bungCount) {
+        if (bungCount >= 350) return 10L;
+        if (bungCount >= 250) return 9L;
+        if (bungCount >= 170) return 8L;
+        if (bungCount >= 120) return 7L;
+        if (bungCount >= 80) return 6L;
+        if (bungCount >= 50) return 5L;
+        if (bungCount >= 30) return 4L;
+        if (bungCount >= 14) return 3L;
+        if (bungCount >= 7) return 2L;
+        return 1L;
     }
 
     @Transactional

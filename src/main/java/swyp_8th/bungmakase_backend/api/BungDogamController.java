@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
 import swyp_8th.bungmakase_backend.domain.BungDogam;
 import swyp_8th.bungmakase_backend.domain.UserBungDogam;
@@ -17,6 +18,7 @@ import swyp_8th.bungmakase_backend.globals.code.SuccessCode;
 import swyp_8th.bungmakase_backend.globals.response.ResponseTemplate;
 import swyp_8th.bungmakase_backend.repository.UserBungDogamRepository;
 import swyp_8th.bungmakase_backend.service.BungDogamService;
+import swyp_8th.bungmakase_backend.service.FileStorageService;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -30,6 +32,7 @@ public class BungDogamController {
 
     private final BungDogamService bungDogamService;
     private final JwtConfig jwtConfig;
+    private final FileStorageService fileStorageService;
 
     @GetMapping("/list")
     public ResponseEntity<ResponseTemplate<List<BungListResponseDto>>> getAllBungDogam() {
@@ -119,6 +122,31 @@ public class BungDogamController {
                     .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
         }
     }
+
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    public ResponseEntity<ResponseTemplate<Map<String, String>>> uploadImage(@RequestPart("image") MultipartFile image) {
+
+        if (image.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ResponseTemplate<>(FailureCode.BAD_REQUEST_400, null));
+        }
+
+        try {
+            // S3에 이미지 업로드
+            String imageUrl = fileStorageService.uploadFile(image);
+
+            Map<String, String> responseData = new HashMap<>();
+            responseData.put("imageUrl", imageUrl);
+
+            return ResponseEntity.status(HttpStatus.OK)
+                    .body(new ResponseTemplate<>(SuccessCode.SUCCESS_200, responseData));
+
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ResponseTemplate<>(FailureCode.SERVER_ERROR_500, null));
+        }
+    }
+
 
     /*@Operation(
             summary = "유저 붕어빵 도감 추가용 임시 API",

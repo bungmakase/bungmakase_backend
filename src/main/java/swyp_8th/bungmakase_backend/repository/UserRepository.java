@@ -2,7 +2,10 @@ package swyp_8th.bungmakase_backend.repository;
 
 import jdk.jfr.Registered;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import swyp_8th.bungmakase_backend.domain.Users;
 
 import java.time.LocalDateTime;
@@ -31,5 +34,10 @@ public interface UserRepository extends JpaRepository<Users, UUID> {
     List<Users> findTop20ByOrderByLevelDescRecentCountDesc();
 
     List<Users> findTop3ByOrderByLevelDescRecentCountDesc();
+
+    @Transactional
+    @Modifying
+    @Query("UPDATE Users u SET u.recentCount = 0")
+    void resetRecentCounts();
 
 }

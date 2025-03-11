@@ -3,6 +3,7 @@ package swyp_8th.bungmakase_backend.service;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import swyp_8th.bungmakase_backend.config.JwtConfig;
@@ -36,6 +37,14 @@ public class ProfileService {
     private final BungDogamRepository bungDogamRepository;
     private final UserBungImageRepository userBungImageRepository;
 
+
+    // 모든 유저의 recentCount 일주일마다 초기화
+    @Scheduled(cron = "0 0 0 * * MON", zone = "Asia/Seoul")
+    public void resetRecentCounts() {
+
+        userRepository.resetRecentCounts();
+
+    }
 
 
 
