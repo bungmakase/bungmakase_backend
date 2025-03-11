@@ -1,4 +1,10 @@
 spring:
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 50MB
+      max-request-size: 50MB
+
   datasource:
     url: jdbc:mysql://211.188.61.117:3306/bungmakase?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true&createDatabaseIfNotExist=true&autoReconnect=true
     username: bungmakase
