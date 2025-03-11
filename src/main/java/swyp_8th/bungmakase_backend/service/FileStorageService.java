@@ -33,22 +33,6 @@ public class FileStorageService {
 
     // 파일 업로드 및 URL 반환
     public String uploadFile(MultipartFile file) {
-//        String fileName = file.getOriginalFilename();
-//
-//        try {
-//            ObjectMetadata metadata = new ObjectMetadata();
-//            metadata.setContentLength(file.getSize()); // 파일 크기 설정
-//            metadata.setContentType(file.getContentType()); // MIME 타입 설정
-//
-//            amazonS3.putObject(
-//                    new PutObjectRequest(bucket, fileName, file.getInputStream(), metadata) // metadata 적용
-//                            .withCannedAcl(CannedAccessControlList.PublicRead) // 퍼블릭 읽기 권한 부여
-//            );
-//
-//            return amazonS3.getUrl(bucket, fileName).toString();
-//        } catch (IOException e) {
-//            throw new RuntimeException("파일 업로드 중 오류가 발생했습니다.", e);
-//        }
 
         try {
             String fileName = file.getOriginalFilename();
